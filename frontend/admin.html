@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel</title>
+  </head>
+  <style>
+    body {
+      display: flex;
+      font-family: Arial, sans-serif;
+    }
+
+    .sidebar {
+      width: 250px;
+      background-color: #333;
+      color: white;
+      padding: 15px;
+    }
+
+    .sidebar h2 {
+      text-align: center;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li {
+      margin: 20px 0;
+    }
+
+    .sidebar ul li a {
+      color: white;
+      text-decoration: none;
+    }
+
+    .content {
+      flex-grow: 1;
+      padding: 20px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+  </style>
+  <body>
+    <div class="sidebar">
+      <h2>Admin Panel</h2>
+      <ul>
+        <li><a href="#dashboard">Dashboard</a></li>
+        <li><a href="#users">Users</a></li>
+        <li><a href="#products">Products</a></li>
+        <li><a href="#orders">Orders</a></li>
+        <li><a href="#reports">Reports</a></li>
+      </ul>
+    </div>
+    <div class="content">
+      <div id="dashboard" class="section">Dashboard Content</div>
+      <div id="users" class="section">User Management Content</div>
+      <div id="products" class="section">Product Management Content</div>
+      <div id="orders" class="section">Order Management Content</div>
+      <div id="reports" class="section">Reports Content</div>
+    </div>
+  </body>
+</html>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const sections = document.querySelectorAll(".section");
+    const navLinks = document.querySelectorAll(".sidebar ul li a");
+
+    navLinks.forEach((link) => {
+      link.addEventListener("click", function (event) {
+        event.preventDefault();
+        const targetSection = document.querySelector(this.getAttribute("href"));
+
+        sections.forEach((section) => section.classList.remove("active"));
+        targetSection.classList.add("active");
+      });
+    });
+    async function fetchUsers() {
+      const response = await fetch("/api/users");
+      const users = await response.json();
+      displayUsers(users);
+    }
+
+    function displayUsers(users) {
+      const usersSection = document.querySelector("#users");
+      usersSection.innerHTML =
+        "<h2>Users</h2><ul>" +
+        users.map((user) => `<li>${user.name} (${user.email})</li>`).join("") +
+        "</ul>";
+    }
+
+    // Fetch users when the users section is clicked
+    document
+      .querySelector('a[href="#users"]')
+      .addEventListener("click", fetchUsers);
+
+    // Set the default active section
+    document.querySelector("#dashboard").classList.add("active");
+  });
+</script>
