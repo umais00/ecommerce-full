@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <!-- Design by foolishdeveloper.com -->
-    <title>Glassmorphism login Form Tutorial in html css</title>
+    <title>Login page</title>
 
     <link rel="preconnect" href="https://fonts.gstatic.com" />
     <link
@@ -150,19 +149,56 @@
       <div class="shape"></div>
       <div class="shape"></div>
     </div>
-    <form>
+    <form id="login-form">
       <h3>Login Here</h3>
 
-      <label for="username">Username</label>
-      <input type="text" placeholder="Email or Phone" id="username" />
+      <label for="email">Email</label>
+      <input type="email" placeholder="Email" id="email" required />
 
       <label for="password">Password</label>
-      <input type="password" placeholder="Password" id="password" />
+      <input type="password" placeholder="Password" id="password" required />
 
-      <button>Log In</button>
+      <button type="submit">Log In</button>
       <div class="text">
-        <h3>don't have an account? <a href="signup.html">signup now</a></h3>
+        <h3>Don't have an account? <a href="signup.html">Signup now</a></h3>
       </div>
     </form>
+
+    <script>
+      document
+        .getElementById("login-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const email = document.getElementById("email").value;
+          const password = document.getElementById("password").value;
+
+          try {
+            const response = await fetch(
+              "http://localhost:5000/api/users/login",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+              }
+            );
+
+            const result = await response.json();
+
+            if (response.ok) {
+              alert("Login successful");
+              // Handle token, e.g., save it to localStorage or a cookie
+              console.log("Token:", result.token);
+            } else {
+              alert(result.message);
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to login");
+          }
+        });
+    </script>
   </body>
 </html>
