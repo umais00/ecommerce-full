@@ -189,8 +189,8 @@
 
             if (response.ok) {
               alert("Login successful");
-              // Handle token, e.g., save it to localStorage or a cookie
-              console.log("Token:", result.token);
+              localStorage.setItem("token", result.token); // Save the token
+              window.location.href = "/frontend/user.html"; // Redirect to user info page
             } else {
               alert(result.message);
             }

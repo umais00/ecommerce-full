@@ -18,5 +18,3 @@ exports.createOrder = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
-// Add other CRUD functions similarly...
