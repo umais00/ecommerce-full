@@ -1,3 +1,182 @@
+// Initialize cart and itemNum from localStorage
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let itemNum = parseInt(localStorage.getItem("itemNum")) || 0;
+
+// Function to update the item number in the DOM and localStorage
+function updateItemNumber() {
+  const itemNumberElement = document.getElementById("itemnumber");
+
+  // Ensure that the element exists before updating it
+  if (itemNumberElement) {
+    itemNumberElement.innerHTML = itemNum;
+  } else {
+    console.error("Element with ID 'itemnumber' not found.");
+  }
+
+  // Save the itemNum to localStorage
+  localStorage.setItem("itemNum", itemNum);
+}
+
+// Update the item number when the page loads
+window.onload = function () {
+  updateItemNumber();
+};
+
+// Function to add an item to the cart
+function addToCart(buttonElement) {
+  if (!buttonElement) {
+    console.error("Button element is undefined.");
+    return;
+  }
+
+  const itemContainer = buttonElement.closest(".item");
+  if (itemContainer) {
+    const productName =
+      itemContainer.querySelector(".main-links a")?.textContent;
+    const productImage = itemContainer.querySelector(".product-image")?.src;
+    const productPriceElement = itemContainer.querySelector("#current");
+
+    if (productName && productImage && productPriceElement) {
+      const productPrice = parseFloat(
+        productPriceElement.textContent.replace(/[^0-9.-]+/g, "")
+      );
+
+      console.log("Product added to cart:", productName);
+      console.log("Image link:", productImage);
+
+      cart.push({
+        name: productName,
+        image: productImage,
+        price: productPrice, // Store the numeric price.
+      });
+
+      itemNum++;
+      updateItemNumber();
+
+      // Save the updated cart to localStorage
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } else {
+      console.error("Product name, image, or price not found.");
+    }
+  } else {
+    console.error("Item container not found.");
+  }
+}
+
+// checkout page
+document.addEventListener("DOMContentLoaded", () => {
+  // Load cart items from localStorage and display them
+  loadCartItems();
+
+  // Handle quantity changes and item removal
+  document.getElementById("tbody").addEventListener("click", handleCartActions);
+});
+
+function loadCartItems() {
+  const tbody = document.getElementById("tbody");
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+  // Clear existing rows
+  tbody.innerHTML = "";
+
+  // Generate rows for each cart item
+  cart.forEach((item, index) => {
+    const row = document.createElement("tr");
+
+    // Thumbnail and item name
+    const thumbnailTd = document.createElement("td");
+    thumbnailTd.className = "flexitem";
+    thumbnailTd.innerHTML = `
+      <div class="thumbnail object-cover">
+        <a href="#"><img src="${item.image}" alt="" /></a>
+      </div>
+      <div class="content">
+        <strong><a href="#">${item.name}</a></strong>
+      </div>
+    `;
+
+    // Price
+    const priceTd = document.createElement("td");
+    priceTd.textContent = `PKR ${item.price.toFixed(2)}`;
+
+    // Quantity control and total price
+    const qtyControlTd = document.createElement("td");
+    qtyControlTd.innerHTML = `
+      <div class="qty-control flexitem">
+        <button class="minus" data-index="${index}">-</button>
+        <input type="text" value="${
+          item.quantity || 1
+        }" min="1" data-index="${index}" />
+        <button class="plus" data-index="${index}">+</button>
+      </div>
+    `;
+
+    const totalPriceTd = document.createElement("td");
+    totalPriceTd.textContent = `PKR ${(
+      item.price * (item.quantity || 1)
+    ).toFixed(2)}`;
+
+    // Remove button
+    const removeTd = document.createElement("td");
+    removeTd.innerHTML = `
+      <a href="#" class="item-remove" data-index="${index}">
+        <i class="ri-close-line"></i>
+      </a>
+    `;
+
+    // Append all cells to the row
+    row.appendChild(thumbnailTd);
+    row.appendChild(priceTd);
+    row.appendChild(qtyControlTd);
+    row.appendChild(totalPriceTd);
+    row.appendChild(removeTd);
+
+    // Append the row to the tbody
+    tbody.appendChild(row);
+  });
+}
+
+function handleCartActions(event) {
+  const target = event.target;
+
+  if (target.classList.contains("minus") || target.classList.contains("plus")) {
+    const index = target.dataset.index;
+    const input = document.querySelector(`input[data-index="${index}"]`);
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    if (target.classList.contains("minus") && input.value > 1) {
+      input.value = parseInt(input.value) - 1;
+    } else if (target.classList.contains("plus")) {
+      input.value = parseInt(input.value) + 1;
+    }
+
+    // Update localStorage with new quantity
+    cart[index].quantity = parseInt(input.value);
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // Recalculate total price for the row
+    const totalPriceTd = input.closest("tr").querySelector("td:nth-child(4)");
+    totalPriceTd.textContent = `PKR ${(
+      cart[index].price * cart[index].quantity
+    ).toFixed(2)}`;
+  }
+
+  if (target.classList.contains("item-remove")) {
+    event.preventDefault();
+    const index = target.dataset.index;
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Remove item from cart
+    cart = cart.filter((_, i) => i !== parseInt(index));
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // Reload cart items
+    loadCartItems();
+  }
+}
+
+// The rest of your script remains unchanged
+
 function copyMenu() {
   var dptCategory = document.querySelector(".dpt-cat");
   var dptPlace = document.querySelector(".departments");
