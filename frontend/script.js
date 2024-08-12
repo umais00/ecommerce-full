@@ -1,8 +1,33 @@
+document.addEventListener("DOMContentLoaded", () => {
+  checkLoginStatus();
+});
+
+function checkLoginStatus() {
+  const token = localStorage.getItem("token");
+
+  const loginElement = document.getElementById("login");
+  const signupElement = document.getElementById("signup");
+  const myAccountElement = document.getElementById("myAccount");
+  console.log(loginElement);
+  if (token) {
+    loginElement.setAttribute("style", "display: none !important; ");
+    signupElement.setAttribute("style", "display: none !important;");
+    myAccountElement.setAttribute("style", "display: block !important;");
+  } else {
+    loginElement.setAttribute("style", "display: block !important;");
+    signupElement.setAttribute("style", "display: block !important;");
+    myAccountElement.setAttribute("style", "display: none !important; ");
+  }
+  console.log("Token found:", !!token);
+  console.log("Login element visibility:", loginElement.style.display);
+  console.log("Signup element visibility:", signupElement.style.display);
+  console.log("My Account element visibility:", myAccountElement.style.display);
+}
+
 // Initialize cart and itemNum from localStorage
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let itemNum = parseInt(localStorage.getItem("itemNum")) || 0;
-
-// Function to update the item number in the DOM and localStorage
+// Call the checkLoginStatus function on page load
 function updateItemNumber() {
   const itemNumberElement = document.getElementById("itemnumber");
 
@@ -17,9 +42,12 @@ function updateItemNumber() {
   localStorage.setItem("itemNum", itemNum);
 }
 
-// Update the item number when the page loads
+// Function to check if the user is logged in
+// Function to check if the user is logged in
+
+// Call the checkLoginStatus function on page load
 window.onload = function () {
-  updateItemNumber();
+  updateItemNumber(); // Update item number when the page loads
 };
 
 // Function to add an item to the cart
@@ -60,6 +88,27 @@ function addToCart(buttonElement) {
     }
   } else {
     console.error("Item container not found.");
+  }
+}
+
+// Function to calculate and display the subtotal
+function calculateSubtotal() {
+  const cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let subtotal = 0;
+
+  cart.forEach((item) => {
+    subtotal += item.price * (item.quantity || 1);
+  });
+  let total = subtotal + 200;
+
+  // Update the subtotal in the DOM
+  const subtotalElement = document.getElementById("price");
+  const totalElement = document.getElementById("total");
+  if (subtotalElement) {
+    subtotalElement.textContent = subtotal.toFixed(2);
+    totalElement.textContent = total.toFixed(2);
+  } else {
+    console.error("Subtotal element with ID 'subt' not found.");
   }
 }
 
@@ -119,7 +168,7 @@ function loadCartItems() {
     // Remove button
     const removeTd = document.createElement("td");
     removeTd.innerHTML = `
-      <a href="#" class="item-remove" data-index="${index}">
+      <a style="cursor: pointer;" class="item-remove" data-index="${index}">
         <i class="ri-close-line"></i>
       </a>
     `;
@@ -134,10 +183,40 @@ function loadCartItems() {
     // Append the row to the tbody
     tbody.appendChild(row);
   });
+
+  // Calculate and display the subtotal
+  calculateSubtotal();
 }
 
 function handleCartActions(event) {
-  const target = event.target;
+  let target = event.target;
+
+  // Check if the target is inside an "item-remove" button (or is the button itself)
+  if (
+    target.classList.contains("item-remove") ||
+    target.closest(".item-remove")
+  ) {
+    event.preventDefault(); // Prevent the default link behavior
+
+    // Get the closest element with the "item-remove" class
+    if (!target.classList.contains("item-remove")) {
+      target = target.closest(".item-remove");
+    }
+
+    const index = target.dataset.index;
+    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+    // Remove item from cart
+    cart = cart.filter((_, i) => i !== parseInt(index));
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    // Decrease the item count and update the DOM
+    itemNum--;
+    updateItemNumber();
+
+    // Reload cart items
+    loadCartItems();
+  }
 
   if (target.classList.contains("minus") || target.classList.contains("plus")) {
     const index = target.dataset.index;
@@ -159,19 +238,9 @@ function handleCartActions(event) {
     totalPriceTd.textContent = `PKR ${(
       cart[index].price * cart[index].quantity
     ).toFixed(2)}`;
-  }
 
-  if (target.classList.contains("item-remove")) {
-    event.preventDefault();
-    const index = target.dataset.index;
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    // Remove item from cart
-    cart = cart.filter((_, i) => i !== parseInt(index));
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    // Reload cart items
-    loadCartItems();
+    // Recalculate and display the subtotal
+    calculateSubtotal();
   }
 }
 

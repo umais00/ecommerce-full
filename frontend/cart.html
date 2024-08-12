@@ -17,6 +17,12 @@
       AlMARI | Online Shopping in Pakistan: Fashion, Electronics & Groceries
     </title>
   </head>
+  <!-- style by umais -->
+  <style>
+    p {
+      display: inline;
+    }
+  </style>
   <body>
     <div id="page" class="site page-cart">
       <!-- header Start  -->
@@ -48,8 +54,9 @@
               </div>
               <div class="right">
                 <ul class="flexitem main-link">
-                  <li><a href="#">Sign Up</a></li>
-                  <li><a href="#">My Account</a></li>
+                  <li><a href="signup.html">Sign Up</a></li>
+                  <li><a href="login.html">login</a></li>
+                  <li><a href="user.html">My Account</a></li>
                   <li><a href="#">Order Tracking</a></li>
                   <li>
                     <a href="#"
@@ -159,7 +166,7 @@
                               <div class="row">
                                 <div class="meida">
                                   <div class="thumbnail object-cover">
-                                    <a href="#">
+                                    <a href="page-offer.html">
                                       <img
                                         src="assets/products/apparel4.jpg"
                                         alt=""
@@ -169,7 +176,9 @@
                                 </div>
                                 <div class="text-content">
                                   <h4>Most Wanted!</h4>
-                                  <a href="#" class="primary-button"
+                                  <a
+                                    href="page-offer.html"
+                                    class="primary-button"
                                     >Order Now!</a
                                   >
                                 </div>
@@ -205,7 +214,7 @@
                       <div class="icon-large shop">
                         <i class="ri-shopping-cart-line"></i>
                         <div class="fly-item">
-                          <span id="itemnumber" class="item-number">5</span>
+                          <span id="itemnumber" class="item-number">0</span>
                         </div>
                       </div>
                       <div class="icon-text">
@@ -226,7 +235,9 @@
                                 /></a>
                               </div>
                               <div class="item-content">
-                                <p><a href="#">mini-cart</a></p>
+                                <p>
+                                  <a href="#">Dimmable Ceiling Light Modern</a>
+                                </p>
                                 <span class="price">
                                   <span>PKR 1,999</span>
                                   <span class="fly-item"><span>2x</span></span>
@@ -339,6 +350,9 @@
                       </div>
                     </div>
                   </li>
+                  <li class="userli">
+                    <a href="user.html" class="user"></a>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -354,7 +368,6 @@
                     <div class="mini-text mobile-hide">Total 1089 Products</div>
                     <a href="#" class="dpt-trigger mobile-hide">
                       <i class="ri-menu-3-line ri-xl"></i>
-                      <i class="ri-close-line ri-xl"></i>
                     </a>
                   </div>
                   <div class="dpt-menu">
@@ -605,12 +618,7 @@
                         </thead>
                         <tbody id="tbody">
                           <tr>
-                            <td class="flexitem">
-                              <h1>why so empty</h1>
-                              <div class="content">
-                                <strong><a href="#">mini-cart</a></strong>
-                              </div>
-                            </td>
+                            <td class="flexitem"></td>
                             <td>PKR 1,999</td>
                             <td>
                               <div class="qty-control flexitem">
@@ -650,87 +658,23 @@
                         <input type="text" placeholder="Enter coupan" />
                         <button>Apply</button>
                       </div>
-                      <div class="Shipping-rate collapse">
-                        <div class="has-child expand">
-                          <a href="#" class="icon-small summary-head"
-                            >Estimate Shipping and Tax</a
-                          >
-                          <div class="content">
-                            <div class="countries">
-                              <form action="">
-                                <label for="country">Country</label>
-                                <select name="country" id="country">
-                                  <option value="">Select the country</option>
-                                  <option value="1">Palestine</option>
-                                  <option value="2">Pakistan</option>
-                                  <option value="3">Iran</option>
-                                  <option value="4">Bangladesh</option>
-                                  <option value="5">others</option>
-                                </select>
-                              </form>
-                            </div>
-                            <div class="states">
-                              <form action="">
-                                <label for="state">State/Provice</label>
-                                <select name="state" id="state">
-                                  <option value="">
-                                    Select a region / state or provice
-                                  </option>
-                                  <option value="1">Palestine</option>
-                                  <option value="2">Pakistan</option>
-                                  <option value="3">Iran</option>
-                                  <option value="4">Bangladesh</option>
-                                  <option value="5">others</option>
-                                </select>
-                              </form>
-                            </div>
-                            <div class="postel-code">
-                              <form action="">
-                                <label for="postel">Zip/Postel Code</label>
-                                <input
-                                  type="number"
-                                  name="postel"
-                                  id="postel"
-                                />
-                              </form>
-                            </div>
-                            <div class="rate-options variant">
-                              <form action="">
-                                <p>
-                                  <span>Flat: PKR 200</span>
-                                  <input
-                                    type="radio"
-                                    name="rate-option"
-                                    id="flat"
-                                    checked
-                                  />
-                                  <label for="flat" class="circle"></label>
-                                </p>
-                                <p>
-                                  <span>Best: PKR 0.00</span>
-                                  <input
-                                    type="radio"
-                                    name="rate-option"
-                                    id="best"
-                                    checked
-                                  />
-                                  <label for="best" class="circle"></label>
-                                </p>
-                              </form>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
+
                       <div class="cart-total">
                         <table>
                           <tbody>
                             <tr>
                               <th>Subtotal</th>
-                              <td>PKR 24,198</td>
+                              <td>
+                                PKR
+                                <p id="price">0</p>
+                              </td>
                             </tr>
                             <tr>
                               <th>Discount</th>
-                              <td>PKR 999</td>
+                              <td>
+                                PKR
+                                <p id="dp">--</p>
+                              </td>
                             </tr>
                             <tr>
                               <th>
@@ -740,7 +684,12 @@
                             </tr>
                             <tr class="grand-total">
                               <th>TOTAL</th>
-                              <td><strong>PKR 23,199</strong></td>
+                              <td>
+                                <strong>
+                                  PKR
+                                  <p id="total">0</p>
+                                </strong>
+                              </td>
                             </tr>
                           </tbody>
                         </table>

@@ -4,6 +4,10 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Admin Panel</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
     <style>
       body {
         display: flex;
@@ -39,6 +43,9 @@
       .section.active {
         display: block;
       }
+      i {
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -70,97 +77,129 @@
         <ul id="orders-list"></ul>
       </div>
     </div>
-  </body>
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-      const sections = document.querySelectorAll(".section");
-      const navLinks = document.querySelectorAll(".sidebar ul li a");
 
-      navLinks.forEach((link) => {
-        link.addEventListener("click", function (event) {
-          event.preventDefault();
-          const targetSection = document.querySelector(
-            this.getAttribute("href")
-          );
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const sections = document.querySelectorAll(".section");
+        const navLinks = document.querySelectorAll(".sidebar ul li a");
 
-          sections.forEach((section) => section.classList.remove("active"));
-          targetSection.classList.add("active");
+        navLinks.forEach((link) => {
+          link.addEventListener("click", function (event) {
+            event.preventDefault();
+            const targetSection = document.querySelector(
+              this.getAttribute("href")
+            );
 
-          if (this.getAttribute("href") === "#users") {
-            fetchUsers();
-          } else if (this.getAttribute("href") === "#products") {
-            fetchProducts();
-          } else if (this.getAttribute("href") === "#orders") {
-            fetchOrders();
-          }
+            sections.forEach((section) => section.classList.remove("active"));
+            targetSection.classList.add("active");
+
+            if (this.getAttribute("href") === "#users") {
+              fetchUsers();
+            } else if (this.getAttribute("href") === "#products") {
+              fetchProducts();
+            } else if (this.getAttribute("href") === "#orders") {
+              fetchOrders();
+            }
+          });
         });
+
+        async function fetchUsers() {
+          try {
+            const response = await fetch("http://localhost:5000/api/users");
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            const users = await response.json();
+            displayUsers(users);
+          } catch (error) {
+            console.error("Failed to fetch users:", error);
+          }
+        }
+
+        function displayUsers(users) {
+          const usersList = document.getElementById("users-list");
+          usersList.innerHTML = users
+            .map(
+              (user) =>
+                `<li>${user.name} (${user.email}) <i class="fa-solid fa-trash" data-id="${user._id}"></i></li>`
+            )
+            .join("");
+
+          // Attach event listeners to the delete icons
+          document.querySelectorAll(".fa-trash").forEach((icon) => {
+            icon.addEventListener("click", async function () {
+              const userId = this.getAttribute("data-id");
+              await deleteUser(userId);
+              fetchUsers(); // Refresh the user list
+            });
+          });
+        }
+
+        async function deleteUser(userId) {
+          try {
+            const response = await fetch(
+              `http://localhost:5000/api/users/${userId}`,
+              {
+                method: "DELETE",
+              }
+            );
+            if (!response.ok) {
+              throw new Error(
+                `Network response was not ok: ${response.statusText}`
+              );
+            }
+            console.log("User deleted successfully.");
+          } catch (error) {
+            console.error("Failed to delete user:", error);
+          }
+        }
+
+        async function fetchProducts() {
+          try {
+            const response = await fetch("http://localhost:5000/api/products");
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            const products = await response.json();
+            displayProducts(products);
+          } catch (error) {
+            console.error("Failed to fetch products:", error);
+          }
+        }
+
+        function displayProducts(products) {
+          const productsList = document.getElementById("products-list");
+          productsList.innerHTML = products
+            .map(
+              (product) =>
+                `<li>${product.name} - $${product.price} (Stock: ${product.stock})</li>`
+            )
+            .join("");
+        }
+
+        async function fetchOrders() {
+          try {
+            const response = await fetch("http://localhost:5000/api/orders");
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            const orders = await response.json();
+            displayOrders(orders);
+          } catch (error) {
+            console.error("Failed to fetch orders:", error);
+          }
+        }
+
+        function displayOrders(orders) {
+          const ordersList = document.getElementById("orders-list");
+          ordersList.innerHTML = orders
+            .map(
+              (order) =>
+                `<li>Order ID: ${order._id}, Total: $${order.total}, Status: ${order.status}</li>`
+            )
+            .join("");
+        }
       });
-
-      async function fetchUsers() {
-        try {
-          const response = await fetch("http://localhost:5000/api/users");
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          const users = await response.json();
-          displayUsers(users);
-        } catch (error) {
-          console.error("Failed to fetch users:", error);
-        }
-      }
-
-      function displayUsers(users) {
-        const usersList = document.getElementById("users-list");
-        usersList.innerHTML = users
-          .map((user) => `<li>${user.name} (${user.email})</li>`)
-          .join("");
-      }
-
-      async function fetchProducts() {
-        try {
-          const response = await fetch("http://localhost:5000/api/products");
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          const products = await response.json();
-          displayProducts(products);
-        } catch (error) {
-          console.error("Failed to fetch products:", error);
-        }
-      }
-
-      function displayProducts(products) {
-        const productsList = document.getElementById("products-list");
-        productsList.innerHTML = products
-          .map(
-            (product) =>
-              `<li>${product.name} - $${product.price} (Stock: ${product.stock})</li>`
-          )
-          .join("");
-      }
-
-      async function fetchOrders() {
-        try {
-          const response = await fetch("http://localhost:5000/api/orders");
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          const orders = await response.json();
-          displayOrders(orders);
-        } catch (error) {
-          console.error("Failed to fetch orders:", error);
-        }
-      }
-
-      function displayOrders(orders) {
-        const ordersList = document.getElementById("orders-list");
-        ordersList.innerHTML = orders
-          .map(
-            (order) =>
-              `<li>Order ID: ${order._id}, Total: $${order.total}, Status: ${order.status}</li>`
-          )
-          .join("");
-      }
-    });
-  </script>
+    </script>
+  </body>
 </html>

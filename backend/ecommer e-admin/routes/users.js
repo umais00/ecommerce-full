@@ -3,8 +3,13 @@ const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const sendOTP = require("../utils/mailer");
 
-const JWT_SECRET = process.env.JWT_SECRET; // Load the secret from environment variables
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// Store user data temporarily in memory (you can use Redis or similar for production)
+let temporaryUserStore = {};
 
 // POST /api/users/register
 router.post("/register", async (req, res) => {
@@ -20,19 +25,81 @@ router.post("/register", async (req, res) => {
       return res.status(400).json({ message: "Email already in use." });
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
+    const otp = crypto.randomInt(100000, 999999).toString();
+    console.log(`Generated OTP for ${email}: ${otp}`); // Debugging line
+    await sendOTP(email, otp);
+
+    // Temporarily store user data and OTP
+    temporaryUserStore[email] = {
       name,
       email,
-      password: hashedPassword,
+      password, // Don't hash the password yet
       address,
       contact,
+      otp,
+      otpExpires: Date.now() + 15 * 60 * 1000,
+    };
+
+    res.status(201).json({
+      message:
+        "User registered successfully. Please verify your email with the OTP sent.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error." });
+  }
+});
+
+// POST /api/users/verify-otp
+// POST /api/users/verify-otp
+router.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+
+  console.log(`Received OTP Verification Request: email=${email}, otp=${otp}`);
+
+  if (!email || !otp) {
+    console.log("Bad Request: Missing email or OTP");
+    return res.status(400).json({ message: "Email and OTP are required." });
+  }
+
+  try {
+    const tempUser = temporaryUserStore[email];
+
+    if (!tempUser) {
+      console.log("User not found:", email);
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    console.log(`Stored OTP for ${email}: ${tempUser.otp}`);
+    console.log(`Received OTP: ${otp}`);
+
+    if (tempUser.otp !== otp || tempUser.otpExpires < Date.now()) {
+      console.log("Invalid or expired OTP");
+      return res.status(400).json({ message: "Invalid or expired OTP." });
+    }
+
+    // Hash the password and create the user in the database
+    const hashedPassword = await bcrypt.hash(tempUser.password, 10);
+    const newUser = new User({
+      name: tempUser.name,
+      email: tempUser.email,
+      password: hashedPassword,
+      address: tempUser.address,
+      contact: tempUser.contact,
+      isActive: true,
     });
 
     await newUser.save();
-    res.status(201).json({ message: "User registered successfully." });
+
+    // Clear temporary user data
+    delete temporaryUserStore[email];
+
+    console.log("OTP successfully verified and account activated");
+    res.status(200).json({
+      message: "OTP verified successfully. Your account is now activated.",
+    });
   } catch (error) {
-    console.error(error);
+    console.error("Server Error:", error);
     res.status(500).json({ message: "Server error." });
   }
 });
@@ -120,6 +187,21 @@ router.put("/update", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error." });
+  }
+});
+
+// DELETE /:id (no need for /api/users prefix here)
+router.delete("/:id", async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const result = await User.findByIdAndDelete(userId);
+    if (!result) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json({ message: "User deleted successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
   }
 });
 

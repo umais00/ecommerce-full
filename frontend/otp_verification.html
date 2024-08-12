@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>OTP Verification</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="wrapper">
+      <h2>Verify Your OTP</h2>
+      <form id="otp-form">
+        <div class="input-box">
+          <input
+            type="email"
+            id="email"
+            placeholder="Enter your email"
+            required
+          />
+        </div>
+        <div class="input-box">
+          <input type="text" id="otp" placeholder="Enter the OTP" required />
+        </div>
+        <div class="input-box button">
+          <input type="submit" value="Verify OTP" />
+        </div>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("otp-form")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const email = document.getElementById("email").value;
+          const otp = document.getElementById("otp").value;
+
+          console.log(`Sending OTP Verification: email=${email}, otp=${otp}`); // Add this line
+
+          try {
+            const response = await fetch(
+              "http://localhost:5000/api/users/verify-otp",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, otp }),
+              }
+            );
+
+            console.log(`Response status: ${response.status}`); // Add this line
+
+            if (response.ok) {
+              alert("OTP verified successfully!");
+              window.location.href = "login.html"; // Redirect to login or another page
+            } else {
+              const errorData = await response.json();
+              console.log("Error data:", errorData); // Add this line
+              alert(
+                `Error: ${
+                  errorData.message ||
+                  "Invalid or expired OTP. Please try again."
+                }`
+              );
+            }
+          } catch (error) {
+            console.error("Error:", error);
+            alert("An error occurred. Please try again.");
+          }
+        });
+    </script>
+  </body>
+</html>
