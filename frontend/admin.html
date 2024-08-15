@@ -46,6 +46,26 @@
       i {
         cursor: pointer;
       }
+      .product-form {
+        margin-top: 20px;
+        max-width: 400px;
+      }
+      .product-form input,
+      .product-form textarea {
+        width: 100%;
+        padding: 10px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+      }
+      .product-form button {
+        padding: 10px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
@@ -71,6 +91,57 @@
       <div id="products" class="section">
         <h2>Products</h2>
         <ul id="products-list"></ul>
+
+        <div class="product-form">
+          <h3>Add New Product</h3>
+          <input
+            type="text"
+            id="product-name"
+            placeholder="Product Name"
+            required
+          />
+          <textarea
+            id="product-description"
+            placeholder="Product Description"
+          ></textarea>
+          <input
+            type="number"
+            id="product-price"
+            placeholder="Product Price"
+            required
+          />
+          <input
+            type="number"
+            id="product-stock"
+            placeholder="Stock Quantity"
+            required
+          />
+          <input
+            type="text"
+            id="product-link"
+            placeholder="Product Link"
+            required
+          />
+          <label for="options">Choose a Category:</label>
+          <select id="options" name="options" required>
+            <option value="bags">bags</option>
+            <option value="beauty">beauty</option>
+            <option value="clothing">clothing</option>
+            <option value="Jewelry">Jewelry</option>
+            <option value="shoes">shoes</option>
+          </select>
+          <br />
+          <label for="options2">Choose a brand:</label>
+          <select id="options2" name="options2" required>
+            <option value="Gul Ahmed">Gul Ahmed</option>
+            <option value="Khaadi">Khaadi</option>
+            <option value="Junaid Jamshed">Junaid Jamshed</option>
+            <option value="limelight">limelight</option>
+            <option value="beechtree">beechtree</option>
+          </select>
+          <br />
+          <button id="add-product-btn">Add Product</button>
+        </div>
       </div>
       <div id="orders" class="section">
         <h2>Orders</h2>
@@ -125,12 +196,11 @@
             )
             .join("");
 
-          // Attach event listeners to the delete icons
           document.querySelectorAll(".fa-trash").forEach((icon) => {
             icon.addEventListener("click", async function () {
               const userId = this.getAttribute("data-id");
               await deleteUser(userId);
-              fetchUsers(); // Refresh the user list
+              fetchUsers();
             });
           });
         }
@@ -148,7 +218,6 @@
                 `Network response was not ok: ${response.statusText}`
               );
             }
-            console.log("User deleted successfully.");
           } catch (error) {
             console.error("Failed to delete user:", error);
           }
@@ -172,7 +241,7 @@
           productsList.innerHTML = products
             .map(
               (product) =>
-                `<li>${product.name} - $${product.price} (Stock: ${product.stock})</li>`
+                `<li>${product.name} - PKR${product.price} (Stock: ${product.stock})</li>`
             )
             .join("");
         }
@@ -199,6 +268,50 @@
             )
             .join("");
         }
+
+        document
+          .getElementById("add-product-btn")
+          .addEventListener("click", async function () {
+            const name = document.getElementById("product-name").value;
+            const description = document.getElementById(
+              "product-description"
+            ).value;
+            const price = document.getElementById("product-price").value;
+            const stock = document.getElementById("product-stock").value;
+            const link = document.getElementById("product-link").value;
+
+            const productData = {
+              name,
+              description,
+              price,
+              stock,
+              productlink: link,
+              category: document.getElementById("options").value,
+              brand: document.getElementById("options2").value,
+            };
+
+            try {
+              const response = await fetch(
+                "http://localhost:5000/api/products",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                  body: JSON.stringify(productData),
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error("Failed to create product");
+              }
+
+              const newProduct = await response.json();
+              fetchProducts(); // Refresh the product list
+            } catch (error) {
+              console.error("Failed to add product:", error);
+            }
+          });
       });
     </script>
   </body>

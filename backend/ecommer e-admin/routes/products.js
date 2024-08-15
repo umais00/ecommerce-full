@@ -1,10 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const productsController = require("../controllers/productController");
+const ProductController = require("../controllers/productController");
 
-router.get("/", productsController.getProducts);
-router.post("/", productsController.createProduct);
+// GET all products
+router.get("/", ProductController.getProducts);
 
-// Add other routes similarly...
+// POST a new product
+router.post("/", ProductController.createProduct);
+
+// You can add more routes for other CRUD operations here
 
 module.exports = router;

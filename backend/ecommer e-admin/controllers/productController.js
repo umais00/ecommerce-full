@@ -2,7 +2,20 @@ const Product = require("../models/products");
 
 exports.getProducts = async (req, res) => {
   try {
-    const products = await Product.find();
+    const { categories, brands } = req.query;
+    let query = {};
+
+    // Filter by categories if provided
+    if (categories) {
+      query.category = { $in: categories.split(",") };
+    }
+
+    // Filter by brands if provided
+    if (brands) {
+      query.brand = { $in: brands.split(",") };
+    }
+
+    const products = await Product.find(query);
     res.json(products);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -18,5 +31,3 @@ exports.createProduct = async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 };
-
-// Add other CRUD functions similarly...

@@ -16,7 +16,133 @@
     <title>
       AlMARI | Online Shopping in Pakistan: Fashion, Electronics & Groceries
     </title>
-    <script src="script.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const categoryFilters = document.getElementById("category-filters");
+        const brandFilters = document.getElementById("brand-filters");
+
+        // Event listener for category filters
+        categoryFilters.addEventListener("change", function () {
+          applyFilters();
+        });
+
+        // Event listener for brand filters
+        brandFilters.addEventListener("change", function () {
+          applyFilters();
+        });
+
+        function applyFilters() {
+          const selectedCategories = Array.from(
+            document.querySelectorAll(
+              '#category-filters input[type="checkbox"]:checked'
+            )
+          ).map((checkbox) => checkbox.value);
+
+          const selectedBrands = Array.from(
+            document.querySelectorAll(
+              '#brand-filters input[type="checkbox"]:checked'
+            )
+          ).map((checkbox) => checkbox.value);
+
+          console.log("Selected Categories:", selectedCategories); // Debugging
+          console.log("Selected Brands:", selectedBrands); // Debugging
+
+          fetchProducts(selectedCategories, selectedBrands);
+        }
+
+        async function fetchProducts(categories = [], brands = []) {
+          try {
+            let url = "http://localhost:5000/api/products";
+            const params = new URLSearchParams();
+            if (categories.length > 0) {
+              params.append("categories", categories.join(","));
+            }
+            if (brands.length > 0) {
+              params.append("brands", brands.join(","));
+            }
+
+            if (params.toString()) {
+              url += `?${params.toString()}`;
+            }
+
+            console.log("Fetching from URL:", url); // Debugging
+            const response = await fetch(url);
+            if (!response.ok) {
+              throw new Error("Network response was not ok");
+            }
+            const products = await response.json();
+            console.log("Products fetched:", products); // Debugging
+            displayProducts(products);
+          } catch (error) {
+            console.error("Failed to fetch products:", error);
+          }
+        }
+
+        function displayProducts(products) {
+          const container = document.getElementById("product-container");
+          console.log(products);
+          container.innerHTML = products
+            .map(
+              (product) => `
+      <div class="item">
+        <div class="media">
+          <div class="thumbnail object-cover">
+            <a href="#"><img src="${product.productlink}" alt="${
+                product.name
+              }" class="product-image"/></a>
+          </div>
+          <div class="hoverable">
+            <ul>
+              <li class="active">
+                <a href="#"><i id="addcart" class="ri-heart-line"></i></a>
+              </li>
+              <li>
+                <a href="#"><i class="ri-eye-line"></i></a>
+              </li>
+              <li>
+                <a href="#"><i class="ri-shuffle-line"></i></a>
+              </li>
+            </ul>
+          </div>
+          <div class="discount circle flexcenter">
+            <span>25%</span>
+          </div>
+        </div>
+        <div class="content">
+          <div class="rating">
+            <div class="stars"></div>
+            <span class="mini-text">(2,847)</span>
+          </div>
+          <h3 class="main-links">
+            <a href="#">${product.name}</a>
+          </h3>
+          <div class="price">
+            <span id="current" class="current">PKR ${product.price}</span>
+            <span class="normal mini-text">PKR ${product.price * 1.5}</span>
+            <button onclick="addToCart(this)">Add to cart</button>
+          </div>
+          <div class="footer">
+            <ul class="mini-text">
+              <li>Polyester, Cotton</li>
+              <li>Pull On Closure</li>
+              <li>Fashion Personality</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    `
+            )
+            .join("");
+        }
+
+        fetchProducts(); // Fetch and display products on page load
+      });
+
+      function addToCart(button) {
+        console.log("Add to cart clicked");
+      }
+    </script>
+    <script defer src="script.js"></script>
   </head>
   <body>
     <div id="page" class="site page-category">
@@ -594,9 +720,14 @@
                     <div class="filter">
                       <div class="filter-block">
                         <h4>Category</h4>
-                        <ul>
+                        <ul id="category-filters">
                           <li>
-                            <input type="checkbox" name="" id="bags" />
+                            <input
+                              type="checkbox"
+                              name="category"
+                              id="bags"
+                              value="bags"
+                            />
                             <label for="bags">
                               <span class="checked"></span>
                               <span>Bags</span>
@@ -604,7 +735,12 @@
                             <span class="count">15</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="beauty" />
+                            <input
+                              type="checkbox"
+                              name="category"
+                              id="beauty"
+                              value="beauty"
+                            />
                             <label for="beauty">
                               <span class="checked"></span>
                               <span>Beauty</span>
@@ -612,7 +748,12 @@
                             <span class="count">2</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="clothing" />
+                            <input
+                              type="checkbox"
+                              name="category"
+                              id="clothing"
+                              value="clothing"
+                            />
                             <label for="clothing">
                               <span class="checked"></span>
                               <span>Clothing</span>
@@ -620,7 +761,12 @@
                             <span class="count">3</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="jewelry" />
+                            <input
+                              type="checkbox"
+                              name="category"
+                              id="jewelry"
+                              value="jewelry"
+                            />
                             <label for="jewelry">
                               <span class="checked"></span>
                               <span>Jewelry</span>
@@ -628,7 +774,12 @@
                             <span class="count">1</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="shoes" />
+                            <input
+                              type="checkbox"
+                              name="category"
+                              id="shoes"
+                              value="shoes"
+                            />
                             <label for="shoes">
                               <span class="checked"></span>
                               <span>Shoes</span>
@@ -637,6 +788,7 @@
                           </li>
                         </ul>
                       </div>
+
                       <div class="filter-block">
                         <h4>Activity</h4>
                         <ul>
@@ -684,9 +836,15 @@
                       </div>
                       <div class="filter-block">
                         <h4>Brands</h4>
-                        <ul>
+                        <ul id="brand-filters">
+                          <!-- Added id here -->
                           <li>
-                            <input type="checkbox" name="" id="Gulahmed" />
+                            <input
+                              type="checkbox"
+                              name="brand"
+                              id="Gulahmed"
+                              value="Gul Ahmed"
+                            />
                             <label for="Gulahmed">
                               <span class="checked"></span>
                               <span>Gul Ahmed</span>
@@ -694,7 +852,12 @@
                             <span class="count">9</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="khaadi" />
+                            <input
+                              type="checkbox"
+                              name="brand"
+                              id="khaadi"
+                              value="Khaadi"
+                            />
                             <label for="khaadi">
                               <span class="checked"></span>
                               <span>Khaadi</span>
@@ -702,7 +865,12 @@
                             <span class="count">7</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="Junaidjamshed" />
+                            <input
+                              type="checkbox"
+                              name="brand"
+                              id="Junaidjamshed"
+                              value="Junaid Jamshed"
+                            />
                             <label for="Junaidjamshed">
                               <span class="checked"></span>
                               <span>Junaid Jamshed</span>
@@ -710,7 +878,12 @@
                             <span class="count">2</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="limelight" />
+                            <input
+                              type="checkbox"
+                              name="brand"
+                              id="limelight"
+                              value="Limelight"
+                            />
                             <label for="limelight">
                               <span class="checked"></span>
                               <span>Limelight</span>
@@ -718,7 +891,12 @@
                             <span class="count">6</span>
                           </li>
                           <li>
-                            <input type="checkbox" name="" id="beechtree" />
+                            <input
+                              type="checkbox"
+                              name="brand"
+                              id="beechtree"
+                              value="Beechtree"
+                            />
                             <label for="beechtree">
                               <span class="checked"></span>
                               <span>Beechtree</span>
@@ -727,6 +905,7 @@
                           </li>
                         </ul>
                       </div>
+
                       <div class="filter-block products">
                         <h4>Color</h4>
                         <ul class="bycolor variant flexitem">
@@ -840,437 +1019,10 @@
                         </div>
                       </div>
                     </div>
-                    <div class="products main flexwrap">
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="#"
-                              ><img
-                                src="assets/products/apparel1.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="#">Happy Sailed Womens Summer Floral</a>
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="page-offer.html"
-                              ><img
-                                src="assets/products/apparel4.jpg"
-                                alt=""
-                                class="product-image"
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="page-offer.html"
-                              >Happy Sailed Womens Summer Floral</a
-                            >
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="#"
-                              ><img
-                                src="assets/products/electronic3.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="#">Happy Sailed Womens Summer Floral</a>
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="#"
-                              ><img
-                                src="assets/products/apparel3.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="#">Happy Sailed Womens Summer Floral</a>
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="page-single.html"
-                              ><img
-                                src="assets/products/shoe1.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="page-single.html"
-                              >Happy Sailed Womens Summer Floral</a
-                            >
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="#"
-                              ><img
-                                src="assets/products/home1.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="#">Happy Sailed Womens Summer Floral</a>
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="#"
-                              ><img
-                                src="assets/products/shoe2.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="#">Happy Sailed Womens Summer Floral</a>
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                      <div class="item">
-                        <div class="media">
-                          <div class="thumbnail object-cover">
-                            <a href="#"
-                              ><img
-                                src="assets/products/shoe3.jpg"
-                                alt=""
-                                class="product-image"
-                            /></a>
-                          </div>
-                          <div class="hoverable">
-                            <ul>
-                              <li class="active">
-                                <a href="#"
-                                  ><i id="addcart" class="ri-heart-line"></i
-                                ></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-eye-line"></i></a>
-                              </li>
-                              <li>
-                                <a href="#"><i class="ri-shuffle-line"></i></a>
-                              </li>
-                            </ul>
-                          </div>
-                          <div class="discount circle flexcenter">
-                            <span>25%</span>
-                          </div>
-                        </div>
-                        <div class="content">
-                          <div class="rating">
-                            <div class="stars"></div>
-                            <span class="mini-text">(2,847)</span>
-                          </div>
-                          <h3 class="main-links">
-                            <a href="#">Happy Sailed Womens Summer Floral</a>
-                          </h3>
-                          <div class="price">
-                            <span id="current" class="current">PKR 1,350</span>
-                            <span class="normal mini-text">PKR 2,350</span>
-                            <button onclick="addToCart(this)">
-                              Add to cart
-                            </button>
-                          </div>
-                          <div class="footer">
-                            <ul class="mini-text">
-                              <li>Polyester, Cotton</li>
-                              <li>Pull On Closure</li>
-                              <li>FAshion Personality</li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
+                    <div class="products main flexwrap" id="product-container">
+                      <!-- Product items will be inserted here by JavaScript -->
                     </div>
+
                     <div class="load-more flexcenter">
                       <a href="#" class="secondary-button"> Load More </a>
                     </div>
