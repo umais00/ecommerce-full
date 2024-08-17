@@ -169,6 +169,20 @@
         .addEventListener("submit", async function (event) {
           event.preventDefault();
 
+          // Disable form elements and change button style
+          const formElements = document.querySelectorAll(
+            "#registration-form input, #registration-form button"
+          );
+          const submitButton = document.querySelector(
+            ".input-box.button input"
+          );
+
+          formElements.forEach((element) => {
+            element.disabled = true;
+          });
+          submitButton.style.backgroundColor = "grey"; // Change button color to grey
+          submitButton.style.cursor = "not-allowed"; // Change cursor to not-allowed
+
           const name = document.getElementById("name").value;
           const email = document.getElementById("email").value;
           const password = document.getElementById("password").value;
@@ -180,11 +194,23 @@
 
           if (password !== confirmPassword) {
             alert("Passwords do not match.");
+            // Re-enable form elements if validation fails
+            formElements.forEach((element) => {
+              element.disabled = false;
+            });
+            submitButton.style.backgroundColor = "#4070f4"; // Reset button color
+            submitButton.style.cursor = "pointer"; // Reset cursor
             return;
           }
 
           if (!terms) {
             alert("You must accept the terms and conditions.");
+            // Re-enable form elements if validation fails
+            formElements.forEach((element) => {
+              element.disabled = false;
+            });
+            submitButton.style.backgroundColor = "#4070f4"; // Reset button color
+            submitButton.style.cursor = "pointer"; // Reset cursor
             return;
           }
 
@@ -196,27 +222,40 @@
             contact,
           };
 
-          const response = await fetch(
-            "http://localhost:5000/api/users/register",
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify(userData),
-            }
-          );
-
-          const responseText = await response.text(); // Get the response text
-          console.log("Response text:", responseText);
-
-          if (response.ok) {
-            alert(
-              "Registration successful! Please check your email for the OTP."
+          try {
+            const response = await fetch(
+              "http://localhost:5000/api/users/register",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify(userData),
+              }
             );
-            window.location.href = "otp_verification.html"; // Redirect to OTP verification page
-          } else {
-            alert("Registration failed. Please try again.");
+
+            const responseText = await response.text(); // Get the response text
+            console.log("Response text:", responseText);
+
+            if (response.ok) {
+              alert(
+                "Registration successful! Please check your email for the OTP."
+              );
+              window.location.href = "otp_verification.html"; // Redirect to OTP verification page
+            } else {
+              alert("Registration failed. Please try again.");
+            }
+          } catch (error) {
+            alert("An error occurred. Please try again.");
+          } finally {
+            // Re-enable form elements after the response is received only if there was an error
+            if (!response.ok) {
+              formElements.forEach((element) => {
+                element.disabled = false;
+              });
+              submitButton.style.backgroundColor = "#4070f4"; // Reset button color
+              submitButton.style.cursor = "pointer"; // Reset cursor
+            }
           }
         });
     </script>

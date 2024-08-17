@@ -99,15 +99,45 @@ function checkLoginStatus() {
   const signupElement = document.getElementById("signup");
   const myAccountElement = document.getElementById("myAccount");
 
-  if (token) {
-    loginElement.style.display = "none";
-    signupElement.style.display = "none";
-    myAccountElement.style.display = "block";
-  } else {
+  if (!token) {
     loginElement.style.display = "block";
     signupElement.style.display = "block";
     myAccountElement.style.display = "none";
+    return;
   }
+
+  // Fetch user profile using the token
+  fetch("http://localhost:5000/api/users/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      if (data._id) {
+        // Token is valid, display the account options
+        loginElement.style.display = "none";
+        signupElement.style.display = "none";
+        myAccountElement.style.display = "block";
+        // You can also display user's name or other details
+        document.getElementById("username").innerText = data.name;
+      } else {
+        // Token is invalid or expired
+        localStorage.removeItem("token");
+        loginElement.style.display = "block";
+        signupElement.style.display = "block";
+        myAccountElement.style.display = "none";
+        localStorage.clear();
+        alert("Session expired, please log in again.");
+      }
+    })
+    .catch((error) => {
+      console.error("Error fetching user profile:", error);
+      localStorage.removeItem("token");
+      loginElement.style.display = "block";
+      signupElement.style.display = "block";
+      myAccountElement.style.display = "none";
+    });
 }
 
 function updateItemNumber() {
