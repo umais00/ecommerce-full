@@ -179,12 +179,19 @@
             placeholder="Stock Quantity"
             required
           />
-          <input
+          <!-- <input
             type="text"
             id="product-link"
             placeholder="Product Link"
             required
+          /> -->
+          <input
+            type="file"
+            id="imageUpload"
+            name="imageUpload"
+            accept="image/*"
           />
+
           <label for="options">Choose a Category:</label>
           <select id="options" name="options" required>
             <option value="bags">bags</option>
@@ -428,27 +435,28 @@
             ).value;
             const price = document.getElementById("product-price").value;
             const stock = document.getElementById("product-stock").value;
-            const link = document.getElementById("product-link").value;
+            // const link = document.getElementById("product-link").value;
+            const imageUpload = document.getElementById("imageUpload").files[0]; // Get the selected file
 
-            const productData = {
-              name,
-              description,
-              price,
-              stock,
-              productlink: link,
-              category: document.getElementById("options").value,
-              brand: document.getElementById("options2").value,
-            };
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("description", description);
+            formData.append("price", price);
+            formData.append("stock", stock);
+            // formData.append("productlink", link);
+            formData.append(
+              "category",
+              document.getElementById("options").value
+            );
+            formData.append("brand", document.getElementById("options2").value);
+            formData.append("image", imageUpload); // Append the image file
 
             try {
               const response = await fetch(
                 "http://localhost:5000/api/products",
                 {
                   method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify(productData),
+                  body: formData,
                 }
               );
 
@@ -462,6 +470,7 @@
               console.error("Failed to add product:", error);
             }
           });
+
         // Add User Form Submission
         document
           .getElementById("add-user-btn")

@@ -186,10 +186,12 @@
             );
 
             const result = await response.json();
+            console.log("API Response:", result); // Log the response for debugging
 
             if (response.ok) {
               alert("Login successful");
               localStorage.setItem("token", result.token); // Save the token
+              console.log("Token saved to localStorage:", result.token); // Confirm the token is being saved
               window.location.href = "/frontend/user.html"; // Redirect to user info page
             } else {
               alert(result.message);

@@ -65,13 +65,11 @@
               url += `?${params.toString()}`;
             }
 
-            console.log("Fetching from URL:", url); // Debugging
             const response = await fetch(url);
             if (!response.ok) {
               throw new Error("Network response was not ok");
             }
             const products = await response.json();
-            console.log("Products fetched:", products); // Debugging
             displayProducts(products);
           } catch (error) {
             console.error("Failed to fetch products:", error);
@@ -80,7 +78,6 @@
 
         function displayProducts(products) {
           const container = document.getElementById("product-container");
-          console.log(products);
           container.innerHTML = products
             .map(
               (product) => `
@@ -137,10 +134,6 @@
 
         fetchProducts(); // Fetch and display products on page load
       });
-
-      function addToCart(button) {
-        console.log("Add to cart clicked");
-      }
     </script>
     <script defer src="script.js"></script>
   </head>
@@ -340,7 +333,7 @@
                       </div>
                       <div class="icon-text">
                         <div class="mini-text">Total</div>
-                        <div class="cart-total">PKR 12,099</div>
+                        <div class="cart-total" id="cart-totl">PKR 12,099</div>
                       </div>
                     </a>
 

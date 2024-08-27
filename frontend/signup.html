@@ -135,12 +135,21 @@
           />
         </div>
         <div class="input-box">
+          <input type="text" id="city" placeholder="city" required />
+        </div>
+        <div class="input-box">
+          <input type="text" id="province" placeholder="province" required />
+        </div>
+        <div class="input-box">
           <input
             type="text"
             id="address"
-            placeholder="Enter Address"
+            placeholder="Enter local Address"
             required
           />
+        </div>
+        <div class="input-box">
+          <input type="text" id="pcode" placeholder="postal code" required />
         </div>
         <div class="input-box">
           <input
@@ -188,7 +197,10 @@
           const password = document.getElementById("password").value;
           const confirmPassword =
             document.getElementById("confirm-password").value;
+          const city = document.getElementById("city").value;
+          const province = document.getElementById("province").value;
           const address = document.getElementById("address").value;
+          const pcode = document.getElementById("pcode").value;
           const contact = document.getElementById("contact").value;
           const terms = document.getElementById("terms").checked;
 
@@ -218,7 +230,10 @@
             name,
             email,
             password,
+            city,
+            province,
             address,
+            pcode,
             contact,
           };
 

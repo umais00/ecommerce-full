@@ -23,7 +23,16 @@ exports.getProducts = async (req, res) => {
 };
 
 exports.createProduct = async (req, res) => {
-  const product = new Product(req.body);
+  const product = new Product({
+    name: req.body.name,
+    description: req.body.description,
+    price: req.body.price,
+    stock: req.body.stock,
+    productlink: req.file ? `assets/products/${req.file.filename}` : null, // Save the image path
+    category: req.body.category,
+    brand: req.body.brand,
+  });
+
   try {
     const newProduct = await product.save();
     res.status(201).json(newProduct);

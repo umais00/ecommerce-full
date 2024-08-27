@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   updateItemNumber();
   loadCartItems();
   setupEventListeners();
+  calculateSubtotal();
 
   // Functions related to menu and search toggles
   copyMenu();
@@ -115,15 +116,16 @@ function checkLoginStatus() {
     .then((response) => response.json())
     .then((data) => {
       if (data._id) {
-        // Token is valid, display the account options
         loginElement.style.display = "none";
         signupElement.style.display = "none";
         myAccountElement.style.display = "block";
-        // You can also display user's name or other details
-        document.getElementById("username").innerText = data.name;
+
+        // Check if the username element exists
+        const usernameElement = document.getElementById("username");
+        if (usernameElement) {
+          usernameElement.innerText = data.name;
+        }
       } else {
-        // Token is invalid or expired
-        localStorage.removeItem("token");
         loginElement.style.display = "block";
         signupElement.style.display = "block";
         myAccountElement.style.display = "none";
@@ -131,18 +133,22 @@ function checkLoginStatus() {
         alert("Session expired, please log in again.");
       }
     })
+
     .catch((error) => {
-      console.error("Error fetching user profile:", error);
-      localStorage.removeItem("token");
+      console.log("Error fetching user profile:", error);
       loginElement.style.display = "block";
       signupElement.style.display = "block";
       myAccountElement.style.display = "none";
     });
 }
 
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let itemNum = parseInt(localStorage.getItem("itemNum")) || 0;
+
+// Function to add an item to the cart
+
 function updateItemNumber() {
   const itemNumberElement = document.getElementById("itemnumber");
-  let itemNum = parseInt(localStorage.getItem("itemNum")) || 0;
 
   if (itemNumberElement) {
     itemNumberElement.innerHTML = itemNum;
@@ -151,14 +157,56 @@ function updateItemNumber() {
   localStorage.setItem("itemNum", itemNum);
 }
 
+function addToCart(buttonElement) {
+  if (!buttonElement) {
+    console.error("Button element is undefined.");
+    return;
+  }
+
+  const itemContainer = buttonElement.closest(".item");
+  if (itemContainer) {
+    const productName =
+      itemContainer.querySelector(".main-links a")?.textContent;
+    const productImage = itemContainer.querySelector(".product-image")?.src;
+    const productPriceElement = itemContainer.querySelector("#current");
+
+    if (productName && productImage && productPriceElement) {
+      const productPrice = parseFloat(
+        productPriceElement.textContent.replace(/[^0-9.-]+/g, "")
+      );
+
+      console.log("Product added to cart:", productName);
+      console.log("Image link:", productImage);
+
+      cart.push({
+        name: productName,
+        image: productImage,
+        price: productPrice, // Store the numeric price.
+      });
+
+      itemNum++;
+      updateItemNumber();
+
+      // Save the updated cart to localStorage
+      localStorage.setItem("cart", JSON.stringify(cart));
+    } else {
+      console.error("Product name, image, or price not found.");
+    }
+  } else {
+    console.error("Item container not found.");
+  }
+}
+
 function loadCartItems() {
   const tbody = document.getElementById("tbody");
+  const checkoutProd = document.getElementById("checkoutprod");
   const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-  if (!tbody) return;
+  if (tbody) tbody.innerHTML = "";
+  if (checkoutProd) checkoutProd.innerHTML = "";
 
-  tbody.innerHTML = "";
   cart.forEach((item, index) => {
+    // Load items into the tbody
     const row = document.createElement("tr");
 
     const thumbnailTd = document.createElement("td");
@@ -204,7 +252,25 @@ function loadCartItems() {
     row.appendChild(totalPriceTd);
     row.appendChild(removeTd);
 
-    tbody.appendChild(row);
+    if (tbody) tbody.appendChild(row);
+
+    // Load items into the checkoutProd ul
+    const listItem = document.createElement("li");
+    listItem.className = "item";
+    listItem.innerHTML = `
+      <div class="thumbnail object-cover">
+        <img src="${item.image}" alt="${item.name}" />
+      </div>
+      <div class="item-content">
+        <p>${item.name}</p>
+        <span class="price">
+          <span>PKR ${item.price.toFixed(2)}</span>
+          <span>x ${item.quantity || 1}</span>
+        </span>
+      </div>
+    `;
+
+    if (checkoutProd) checkoutProd.appendChild(listItem);
   });
 
   calculateSubtotal();
@@ -222,10 +288,19 @@ function calculateSubtotal() {
 
   const subtotalElement = document.getElementById("price");
   const totalElement = document.getElementById("total");
+  const cartTotalElement = document.getElementById("cart-totl");
+  const tt = document.getElementById("tt");
+  if (tt) {
+    tt.textContent = total.toFixed(2);
+  }
 
   if (subtotalElement) {
     subtotalElement.textContent = subtotal.toFixed(2);
     totalElement.textContent = total.toFixed(2);
+  }
+
+  if (cartTotalElement) {
+    cartTotalElement.textContent = `PKR ${total.toFixed(2)}`;
   }
 }
 

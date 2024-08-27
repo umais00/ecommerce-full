@@ -9,7 +9,10 @@ const userSchema = new mongoose.Schema({
     enum: ["admin", "editor", "viewer"],
     default: "viewer",
   },
+  city: { type: String, required: true },
+  province: { type: String, required: true },
   address: { type: String, required: true },
+  pcode: { type: Number, required: true },
   contact: { type: String, required: true },
 });
 

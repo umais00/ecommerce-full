@@ -3,6 +3,20 @@ const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 require("dotenv").config();
+const multer = require("multer");
+const path = require("path");
+
+// Set up storage location and file naming
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join(__dirname, "../../../frontend/assets/products")); // Directory where files will be stored
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // Filename with timestamp
+  },
+});
+
+const upload = multer({ storage: storage });
 
 const usersRouter = require("./routes/users");
 const productsRouter = require("./routes/products");
@@ -17,6 +31,12 @@ app.use(
   })
 );
 app.use(bodyParser.json());
+
+// Serve static files
+app.use(
+  "/assets/products",
+  express.static(path.join(__dirname, "../../../frontend/assets/products"))
+);
 
 mongoose.connect(process.env.DATABASE_URL);
 const db = mongoose.connection;

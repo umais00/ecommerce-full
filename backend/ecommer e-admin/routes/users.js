@@ -10,7 +10,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // Store user data temporarily in memory (you can use Redis or similar for production)
 let temporaryUserStore = {};
-// POST /api/users/manual-create
+
 // POST /api/users/manual-create
 router.post("/manual-create", async (req, res) => {
   const { name, email, password, address, contact, role } = req.body;
@@ -48,9 +48,19 @@ router.post("/manual-create", async (req, res) => {
 
 // POST /api/users/register
 router.post("/register", async (req, res) => {
-  const { name, email, password, address, contact } = req.body;
+  const { name, email, password, city, province, address, pcode, contact } =
+    req.body;
 
-  if (!name || !email || !password || !address || !contact) {
+  if (
+    !name ||
+    !email ||
+    !password ||
+    !city ||
+    !province ||
+    !address ||
+    !pcode ||
+    !contact
+  ) {
     return res.status(400).json({ message: "All fields are required." });
   }
 
@@ -61,15 +71,17 @@ router.post("/register", async (req, res) => {
     }
 
     const otp = crypto.randomInt(100000, 999999).toString();
-    console.log(`Generated OTP for ${email}: ${otp}`); // Debugging line
     await sendOTP(email, otp);
 
-    // Temporarily store user data and OTP
+    // Store user data temporarily
     temporaryUserStore[email] = {
       name,
       email,
       password, // Don't hash the password yet
+      city,
+      province,
       address,
+      pcode,
       contact,
       otp,
       otpExpires: Date.now() + 15 * 60 * 1000,
@@ -84,6 +96,7 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ message: "Server error." });
   }
 });
+
 // POST /api/validate-token
 router.post("/validate-token", async (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -136,7 +149,10 @@ router.post("/verify-otp", async (req, res) => {
       name: tempUser.name,
       email: tempUser.email,
       password: hashedPassword,
+      city: tempUser.city,
+      province: tempUser.province,
       address: tempUser.address,
+      pcode: tempUser.pcode,
       contact: tempUser.contact,
       isActive: true,
     });
