@@ -4,7 +4,6 @@ const ordersController = require("../controllers/orderController");
 
 router.get("/", ordersController.getOrders);
 router.post("/", ordersController.createOrder);
-
-// Add other routes similarly...
+router.delete("/:id", ordersController.deleteOrder); // Add the delete route
 
 module.exports = router;

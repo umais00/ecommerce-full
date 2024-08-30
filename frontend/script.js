@@ -1,12 +1,48 @@
-document.addEventListener("DOMContentLoaded", () => {
-  checkLoginStatus();
-  updateItemNumber();
-  loadCartItems();
-  setupEventListeners();
-  calculateSubtotal();
+function arrayBufferToBase64(buffer, contentType) {
+  // Convert Buffer to Uint8Array
+  const byteArray = new Uint8Array(buffer);
+  let binary = "";
+  const len = byteArray.byteLength;
+  for (let i = 0; i < len; i++) {
+    binary += String.fromCharCode(byteArray[i]);
+  }
+  return `data:${contentType};base64,${btoa(binary)}`;
+}
 
-  // Functions related to menu and search toggles
-  copyMenu();
+document.addEventListener("DOMContentLoaded", () => {
+  const token = localStorage.getItem("token");
+  if (!token) return;
+
+  fetch("http://localhost:5000/api/users/me", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then((response) => response.json())
+    .then((user) => {
+      const userImage = user.image; // Assuming user.image is an object with buffer data
+      console.log(userImage);
+
+      if (userImage && userImage.data && userImage.contentType) {
+        // Convert Buffer data to ArrayBuffer
+        const arrayBuffer = new Uint8Array(userImage.data.data).buffer;
+        const base64Image = arrayBufferToBase64(
+          arrayBuffer,
+          userImage.contentType
+        );
+
+        const userElement = document.getElementById("user");
+        if (userElement) {
+          userElement.style.backgroundImage = `url(${base64Image})`;
+          // Additional CSS styling to ensure the image is visible
+          userElement.style.backgroundSize = "cover";
+          userElement.style.backgroundPosition = "center";
+        }
+      } else {
+        console.error("Invalid user image data.");
+      }
+    })
+    .catch((error) => console.error("Error fetching user data:", error));
 
   const menuButton = document.querySelector(".trigger"),
     closeButton = document.querySelector(".t-close"),
@@ -133,7 +169,6 @@ function checkLoginStatus() {
         alert("Session expired, please log in again.");
       }
     })
-
     .catch((error) => {
       console.log("Error fetching user profile:", error);
       loginElement.style.display = "block";
@@ -141,7 +176,6 @@ function checkLoginStatus() {
       myAccountElement.style.display = "none";
     });
 }
-
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
 let itemNum = parseInt(localStorage.getItem("itemNum")) || 0;
 
@@ -169,19 +203,18 @@ function addToCart(buttonElement) {
       itemContainer.querySelector(".main-links a")?.textContent;
     const productImage = itemContainer.querySelector(".product-image")?.src;
     const productPriceElement = itemContainer.querySelector("#current");
+    const productQuantity = 1; // Default quantity
 
     if (productName && productImage && productPriceElement) {
       const productPrice = parseFloat(
         productPriceElement.textContent.replace(/[^0-9.-]+/g, "")
       );
 
-      console.log("Product added to cart:", productName);
-      console.log("Image link:", productImage);
-
       cart.push({
         name: productName,
         image: productImage,
-        price: productPrice, // Store the numeric price.
+        price: productPrice,
+        quantity: productQuantity, // Include quantity here
       });
 
       itemNum++;
@@ -370,3 +403,22 @@ function copyMenu() {
   const topPlace = document.querySelector(".off-canvas .thetop-nav");
   topPlace.innerHTML = topNav.innerHTML;
 }
+
+document
+  .getElementById("checkoutForm")
+  .addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const totalAmount = cart.reduce(
+      (acc, item) => acc + item.price * (item.quantity || 1),
+      200 // Include shipping
+    );
+
+    // Populate the hidden inputs with cart data
+    document.getElementById("products").value = JSON.stringify(cart);
+    document.getElementById("totalAmount").value = totalAmount.toFixed(2);
+
+    // Manually submit the form
+    this.submit();
+  });

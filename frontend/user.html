@@ -4,76 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Info</title>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f4f4f4;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-      }
-
-      h1 {
-        margin-bottom: 20px;
-      }
-
-      .container {
-        background: #fff;
-        padding: 20px;
-        border-radius: 8px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        max-width: 400px;
-        width: 100%;
-      }
-
-      label {
-        display: block;
-        margin-top: 10px;
-      }
-
-      input {
-        width: 100%;
-        padding: 8px;
-        margin-top: 5px;
-        border-radius: 4px;
-        border: 1px solid #ccc;
-      }
-
-      button {
-        margin-top: 20px;
-        padding: 10px 15px;
-        border: none;
-        border-radius: 4px;
-        background-color: #007bff;
-        color: #fff;
-        cursor: pointer;
-      }
-
-      button:hover {
-        background-color: #0056b3;
-      }
-
-      .info {
-        margin-bottom: 20px;
-      }
-
-      .info span {
-        display: block;
-        margin: 5px 0;
-      }
-
-      .edit-form {
-        display: none;
-      }
-
-      .edit-form.active {
-        display: block;
-      }
-    </style>
+    <link rel="stylesheet" href="stylesheets/user.css" />
   </head>
   <body>
     <div class="container">
@@ -83,9 +14,12 @@
         <div><strong>Email:</strong> <span id="user-email"></span></div>
         <div><strong>Address:</strong> <span id="user-address"></span></div>
         <div><strong>Contact:</strong> <span id="user-contact"></span></div>
+        <div><strong>City:</strong> <span id="user-city"></span></div>
+        <div><strong>Province:</strong> <span id="user-province"></span></div>
+        <div><strong>Postal Code:</strong> <span id="user-pcode"></span></div>
       </div>
       <button id="edit-btn">Edit</button>
-      <form id="edit-form" class="edit-form">
+      <form id="edit-form" class="edit-form" enctype="multipart/form-data">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" required />
         <label for="email">Email:</label>
@@ -94,6 +28,19 @@
         <input type="text" id="address" name="address" required />
         <label for="contact">Contact:</label>
         <input type="text" id="contact" name="contact" required />
+        <label for="city">City:</label>
+        <input type="text" id="city" name="city" placeholder="City" />
+        <label for="province">Province:</label>
+        <input
+          type="text"
+          id="province"
+          name="province"
+          placeholder="Province"
+        />
+        <label for="pcode">Postal Code:</label>
+        <input type="text" id="pcode" name="pcode" placeholder="Postal Code" />
+        <label for="pfp">Profile Picture:</label>
+        <input type="file" name="pfp" id="pfp" accept="image/*" />
         <button type="submit">Update</button>
       </form>
       <a href="index.html"> <button>Go Home</button></a>
@@ -121,6 +68,10 @@
             document.getElementById("user-email").textContent = user.email;
             document.getElementById("user-address").textContent = user.address;
             document.getElementById("user-contact").textContent = user.contact;
+            document.getElementById("user-city").textContent = user.city;
+            document.getElementById("user-province").textContent =
+              user.province;
+            document.getElementById("user-pcode").textContent = user.pcode;
 
             // Check if the user is an admin
             const isAdmin = user.role == "admin" || user.role == "editor";
@@ -139,6 +90,9 @@
             document.getElementById("email").value = user.email;
             document.getElementById("address").value = user.address;
             document.getElementById("contact").value = user.contact;
+            document.getElementById("city").value = user.city;
+            document.getElementById("province").value = user.province;
+            document.getElementById("pcode").value = user.pcode;
           })
           .catch((error) => console.error("Error fetching user data:", error));
 
@@ -148,37 +102,60 @@
           editForm.classList.toggle("active");
         });
 
-        // Handle form submission
         document.getElementById("edit-form").addEventListener("submit", (e) => {
           e.preventDefault();
 
-          const updatedUser = {
-            name: document.getElementById("name").value,
-            email: document.getElementById("email").value,
-            address: document.getElementById("address").value,
-            contact: document.getElementById("contact").value,
-          };
+          const fileInput = document.getElementById("pfp");
+          const file = fileInput.files[0];
+
+          if (file) {
+            const maxSize = 5 * 1024 * 1024; // 5MB in bytes
+            if (file.size > maxSize) {
+              alert("File size exceeds 5MB. Please choose a smaller file.");
+              return;
+            }
+          }
+
+          const formData = new FormData();
+          formData.append("name", document.getElementById("name").value);
+          formData.append("email", document.getElementById("email").value);
+          formData.append("address", document.getElementById("address").value);
+          formData.append("contact", document.getElementById("contact").value);
+          formData.append("city", document.getElementById("city").value);
+          formData.append(
+            "province",
+            document.getElementById("province").value
+          );
+          formData.append("pcode", document.getElementById("pcode").value);
+          if (file) {
+            formData.append("pfp", file);
+          }
 
           fetch("http://localhost:5000/api/users/update", {
             method: "PUT",
             headers: {
-              "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-            body: JSON.stringify(updatedUser),
+            body: formData,
           })
             .then((response) => response.json())
             .then((data) => {
               alert("User updated successfully");
               // Update the displayed info
               document.getElementById("user-name").textContent =
-                updatedUser.name;
+                document.getElementById("name").value;
               document.getElementById("user-email").textContent =
-                updatedUser.email;
+                document.getElementById("email").value;
               document.getElementById("user-address").textContent =
-                updatedUser.address;
+                document.getElementById("address").value;
               document.getElementById("user-contact").textContent =
-                updatedUser.contact;
+                document.getElementById("contact").value;
+              document.getElementById("user-city").textContent =
+                document.getElementById("city").value;
+              document.getElementById("user-province").textContent =
+                document.getElementById("province").value;
+              document.getElementById("user-pcode").textContent =
+                document.getElementById("pcode").value;
               document.getElementById("edit-form").classList.remove("active"); // Hide form
             })
             .catch((error) =>

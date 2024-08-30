@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="stylesheets/style.css" />
     <link
       href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.css"
       rel="stylesheet"
@@ -694,65 +694,56 @@
               <div class="checkout flexwrap">
                 <div class="item left styled">
                   <h1>Shipping Address</h1>
-                  <form action="">
+                  <form id="checkoutForm" >
                     <p>
                       <label for="email">Email Address <span></span></label>
-                      <input
-                        type="email"
-                        name="email"
-                        id="email"
-                        autocomplete="off"
-                        required
-                      />
+                      <input type="email" name="email" id="email" required />
                     </p>
                     <p>
                       <label for="fname">First Name <span></span></label>
-                      <input type="text" id="fname" required />
+                      <input type="text" name="firstName" id="fname" required />
                     </p>
                     <p>
-                      <label for="lname">Last Name<span></span></label>
-                      <input type="text" id="lname" required />
+                      <label for="lname">Last Name <span></span></label>
+                      <input type="text" name="lastName" id="lname" required />
                     </p>
-
                     <p>
                       <label for="address">Street Address <span></span></label>
-                      <input type="text" id="address" required />
+                      <input type="text" name="address" id="address" required />
                     </p>
                     <p>
                       <label for="city">City <span></span></label>
-                      <input type="text" id="city" required />
+                      <input type="text" name="city" id="city" required />
                     </p>
                     <p>
-                      <label for="state">State/Provice <span></span></label>
-                      <input type="text" id="state" required />
+                      <label for="state">State/Province <span></span></label>
+                      <input type="text" name="state" id="state" required />
                     </p>
                     <p>
-                      <label for="postal"> Postal code <span></span></label>
-                      <input type="number" id="postal" required />
+                      <label for="postal">Postal Code <span></span></label>
+                      <input type="number" name="postalCode" id="postal" required />
                     </p>
-             
                     <p>
                       <label for="phone">Phone Number <span></span></label>
-                      <input type="number" id="phone" required />
+                      <input type="number" name="phone" id="phone" required />
                     </p>
                     <p>
                       <label>Order Notes (optional)</label>
-                      <textarea cols="30" rows="10"></textarea>
+                      <textarea name="orderNotes" cols="30" rows="10"></textarea>
                     </p>
-               
-                        <div class="shipping-methods">
-                    <h2>Shipping Methods</h2>
-                    <h3 style="color:#ff3333">*we only do Cash On Delivery for now </h3>
-                    <br>
-                    <p class="checkset">
-                      <input type="radio" checked />
-                      <label>PKR 200 Flat Rote</label>
-                    </p>
-                  </div>
-                  <div class="primary-checkout">
-                    <input type="submit" value="place order" class="primary-button">
-                  </div>
+                    <div class="shipping-methods">
+                      <h2>Shipping Methods</h2>
+                      <h3 style="color:#ff3333">*We only do Cash On Delivery for now</h3>
+                      <p class="checkset">
+                        <input type="radio" name="shippingMethod" value="200" checked />
+                        <label>PKR 200 Flat Rate</label>
+                      </p>
+                    </div>
+                    <div class="primary-checkout">
+                      <input type="submit" value="Place Order" class="primary-button">
+                    </div>
                   </form>
+                  
               
                 </div>
                 <div class="item right">
@@ -984,3 +975,54 @@
   </body>
 </html>
 <script src="script.js"></script>
+<script>
+  if(!localStorage.getItem("cart")){
+    alert("Please fill out the cart first!");
+    location.href = "categoreis.html"
+  }
+document.getElementById('checkoutForm').addEventListener('submit', function(event) {
+  event.preventDefault();
+
+  if(localStorage.getItem('cart')){
+  const formData = {
+    email: document.getElementById('email').value,
+    firstName: document.getElementById('fname').value,
+    lastName: document.getElementById('lname').value,
+    address: document.getElementById('address').value,
+    city: document.getElementById('city').value,
+    state: document.getElementById('state').value,
+    postalCode: document.getElementById('postal').value,
+    phone: document.getElementById('phone').value,
+    orderNotes: document.querySelector('textarea[name="orderNotes"]').value,
+    products: JSON.parse(localStorage.getItem('cart')), // Make sure cart items are correctly formatted
+    totalAmount: calculateTotalAmount(), // Implement this function to calculate total
+  };
+
+  fetch('http://127.0.0.1:5000/api/orders', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(formData),
+  })
+    .then(response => response.json())
+    .then(data => {
+      alert("Your order has been successfully processed")
+      localStorage.removeItem("itemNum");      // Handle successful response, e.g., show a success message or redirect
+      localStorage.removeItem("cart"); 
+           // Handle successful response, e.g., show a success message or redirect
+           location.reload();
+    })
+    .catch((error) => {
+      console.error('Error:', error);
+    });
+  } else{
+    alert("Your cart is empty. Please add items to proceed with checkout.")
+  }
+});
+
+function calculateTotalAmount() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  return cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
+}
+</script>

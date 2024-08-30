@@ -1815,13 +1815,14 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 .userli {
-  background-image: url(assets/userpfp.jpg);
+  background-image: url(../assets/userpfp.jpg);
   background-size: cover;
   width: 70px;
   height: 70px;
   border-radius: 50%;
   border: 1px solid #ccc;
   margin-left: 10px;
+  overflow: hidden;
 }
 .user {
   width: 100%;
@@ -2097,6 +2098,26 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: 0.5em;
 }
 
+.patc {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.atcbtn {
+  background-color: #28636d;
+  height: 2rem;
+  width: 6rem;
+  border-radius: 13px;
+  color: #fff;
+  border: 1px solid black;
+  transition: all 0.2s ease-in;
+}
+.atcbtn:hover {
+  scale: 1.1;
+  border-top: 2px solid black;
+}
+
 /* Media Queries  */
 @media screen and (max-width: 390px) {
   .cart-summary .coupan input {
@@ -2224,9 +2245,9 @@ input[type="range"]::-webkit-slider-thumb {
     margin: 0;
     border-bottom: 0;
   }
-  .header-nav .right li > a {
+  /* .header-nav .right li > a {
     margin-left: 1em;
-  }
+  } */
   nav .mega {
     position: absolute;
     width: var(--percent100);

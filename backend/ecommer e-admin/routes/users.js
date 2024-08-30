@@ -5,96 +5,14 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const sendOTP = require("../utils/mailer");
-
-const JWT_SECRET = process.env.JWT_SECRET;
-
-// Store user data temporarily in memory (you can use Redis or similar for production)
+const multer = require("multer");
+const UserController = require("../controllers/userController");
 let temporaryUserStore = {};
 
-// POST /api/users/manual-create
-router.post("/manual-create", async (req, res) => {
-  const { name, email, password, address, contact, role } = req.body;
-
-  if (!name || !email || !password || !role) {
-    return res
-      .status(400)
-      .json({ message: "Name, email, password, and role are required." });
-  }
-
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already in use." });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({
-      name, // Add name
-      email,
-      password: hashedPassword,
-      address, // Add address
-      contact, // Add contact
-      role,
-      isActive: true,
-    });
-
-    await newUser.save();
-    res.status(201).json(newUser);
-  } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).json({ message: "Server error." });
-  }
-});
-
-// POST /api/users/register
-router.post("/register", async (req, res) => {
-  const { name, email, password, city, province, address, pcode, contact } =
-    req.body;
-
-  if (
-    !name ||
-    !email ||
-    !password ||
-    !city ||
-    !province ||
-    !address ||
-    !pcode ||
-    !contact
-  ) {
-    return res.status(400).json({ message: "All fields are required." });
-  }
-
-  try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already in use." });
-    }
-
-    const otp = crypto.randomInt(100000, 999999).toString();
-    await sendOTP(email, otp);
-
-    // Store user data temporarily
-    temporaryUserStore[email] = {
-      name,
-      email,
-      password, // Don't hash the password yet
-      city,
-      province,
-      address,
-      pcode,
-      contact,
-      otp,
-      otpExpires: Date.now() + 15 * 60 * 1000,
-    };
-
-    res.status(201).json({
-      message:
-        "User registered successfully. Please verify your email with the OTP sent.",
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error." });
-  }
+const storage = multer.memoryStorage();
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 5 * 1024 * 1024 }, // limit file size to 5MB
 });
 
 // POST /api/validate-token
@@ -115,7 +33,6 @@ router.post("/validate-token", async (req, res) => {
   }
 });
 
-// POST /api/users/verify-otp
 // POST /api/users/verify-otp
 router.post("/verify-otp", async (req, res) => {
   const { email, otp } = req.body;
@@ -233,31 +150,6 @@ router.get("/me", async (req, res) => {
   }
 });
 
-// PUT /api/users/update
-router.put("/update", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "No token provided" });
-
-  const { name, email, address, contact } = req.body;
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    user.name = name;
-    user.email = email;
-    user.address = address;
-    user.contact = contact;
-    await user.save();
-
-    res.json({ message: "User updated successfully" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error." });
-  }
-});
-
 // Example using Express.js
 router.patch("/:id", async (req, res) => {
   const userId = req.params.id;
@@ -290,6 +182,136 @@ router.delete("/:id", async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
+  }
+});
+
+const JWT_SECRET = process.env.JWT_SECRET;
+
+// POST /api/users/manual-create
+router.post("/manual-create", async (req, res) => {
+  const { name, email, password, address, contact, role } = req.body;
+
+  if (!name || !email || !password || !role) {
+    return res
+      .status(400)
+      .json({ message: "Name, email, password, and role are required." });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already in use." });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name, // Add name
+      email,
+      password: hashedPassword,
+      address, // Add address
+      contact, // Add contact
+      role,
+      isActive: true,
+    });
+
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).json({ message: "Server error." });
+  }
+});
+
+// POST /api/users/register
+router.post("/register", upload.single("image"), async (req, res) => {
+  const { name, email, password, city, province, address, pcode, contact } =
+    req.body;
+
+  if (
+    !name ||
+    !email ||
+    !password ||
+    !city ||
+    !province ||
+    !address ||
+    !pcode ||
+    !contact
+  ) {
+    return res.status(400).json({ message: "All fields are required." });
+  }
+
+  try {
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.status(400).json({ message: "Email already in use." });
+    }
+
+    const otp = crypto.randomInt(100000, 999999).toString();
+    await sendOTP(email, otp);
+
+    temporaryUserStore[email] = {
+      name,
+      email,
+      password, // Don't hash the password yet
+      city,
+      province,
+      address,
+      pcode,
+      contact,
+      image: {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      },
+      otp,
+      otpExpires: Date.now() + 15 * 60 * 1000,
+    };
+
+    res.status(201).json({
+      message:
+        "User registered successfully. Please verify your email with the OTP sent.",
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error." });
+  }
+});
+
+// Add multer to the update route
+router.put("/update", upload.single("pfp"), async (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "No token provided" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    const user = await User.findById(decoded.userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    console.log("User before update:", user);
+
+    user.name = req.body.name;
+    user.email = req.body.email;
+    user.address = req.body.address;
+    user.contact = req.body.contact;
+    user.city = req.body.city;
+    user.province = req.body.province;
+    user.pcode = req.body.pcode;
+
+    if (req.file) {
+      console.log("Updating user image...");
+      user.image = {
+        data: req.file.buffer,
+        contentType: req.file.mimetype,
+      };
+    }
+
+    await user.save();
+
+    console.log("User after update:", user);
+
+    res.json({ message: "User updated successfully" });
+  } catch (error) {
+    console.error("Update error:", error);
+    res.status(500).json({ message: "Server error." });
   }
 });
 
