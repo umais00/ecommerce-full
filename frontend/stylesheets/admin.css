@@ -63,6 +63,29 @@ i {
   font-weight: bold;
 }
 
+.user-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.user-form h3 {
+  font-size: 2rem;
+  margin: 0 0 10px 0;
+}
+
+.user-form input,
+.user-form select,
+.user-form button {
+  width: 50%;
+  height: 2rem;
+}
+.user-form button {
+  background-color: #5ccfb6;
+  height: 3rem;
+  color: white;
+  font-size: 1.8rem;
+}
+
 .product-form {
   margin-top: 20px;
   max-width: 400px;
