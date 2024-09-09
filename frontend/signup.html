@@ -162,7 +162,8 @@
               );
               window.location.href = "otp_verification.html"; // Redirect to OTP verification page
             } else {
-              alert("Registration failed. Please try again.");
+              alert(responseText);
+              location.reload();
             }
           } catch (error) {
             alert("An error occurred. Please try again.");

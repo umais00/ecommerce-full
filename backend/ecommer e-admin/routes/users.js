@@ -113,7 +113,7 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "25h",
     });
 
     res.json({ token });
@@ -189,7 +189,17 @@ const JWT_SECRET = process.env.JWT_SECRET;
 
 // POST /api/users/manual-create
 router.post("/manual-create", async (req, res) => {
-  const { name, email, password, address, contact, role } = req.body;
+  const {
+    name,
+    email,
+    password,
+    city,
+    province,
+    address,
+    pcode,
+    contact,
+    role,
+  } = req.body;
 
   if (!name || !email || !password || !role) {
     return res
@@ -208,7 +218,10 @@ router.post("/manual-create", async (req, res) => {
       name, // Add name
       email,
       password: hashedPassword,
-      address, // Add address
+      city,
+      province,
+      address,
+      pcode,
       contact, // Add contact
       role,
       isActive: true,
@@ -223,10 +236,12 @@ router.post("/manual-create", async (req, res) => {
 });
 
 // POST /api/users/register
-router.post("/register", upload.single("image"), async (req, res) => {
+router.post("/register", async (req, res) => {
+  // Extract user details from request body
   const { name, email, password, city, province, address, pcode, contact } =
     req.body;
 
+  // Check if all required fields are provided
   if (
     !name ||
     !email ||
@@ -241,36 +256,37 @@ router.post("/register", upload.single("image"), async (req, res) => {
   }
 
   try {
+    // Check if email is already in use
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.status(400).json({ message: "Email already in use." });
     }
 
+    // Generate OTP and send it to the user's email
     const otp = crypto.randomInt(100000, 999999).toString();
     await sendOTP(email, otp);
 
+    // Store user details temporarily with OTP information
     temporaryUserStore[email] = {
       name,
       email,
-      password, // Don't hash the password yet
+      password, // Note: In a real-world application, you should hash the password before storing it
       city,
       province,
       address,
       pcode,
       contact,
-      image: {
-        data: req.file.buffer,
-        contentType: req.file.mimetype,
-      },
       otp,
-      otpExpires: Date.now() + 15 * 60 * 1000,
+      otpExpires: Date.now() + 15 * 60 * 1000, // OTP expires in 15 minutes
     };
 
+    // Respond with success message
     res.status(201).json({
       message:
         "User registered successfully. Please verify your email with the OTP sent.",
     });
   } catch (error) {
+    // Handle any errors that occur during the process
     console.error(error);
     res.status(500).json({ message: "Server error." });
   }

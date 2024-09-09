@@ -95,3 +95,31 @@ exports.deleteProduct = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+exports.rStock = async (req, res) => {
+  try {
+    const productId = req.params.id; // Use `id` to match the route parameter
+    const { quantity } = req.body;
+
+    const product = await Product.findById(productId);
+
+    if (!product) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Product not found" });
+    }
+
+    if (product.stock < quantity) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Not enough stock" });
+    }
+
+    product.stock -= quantity;
+    await product.save();
+
+    res.json({ success: true, product });
+  } catch (error) {
+    console.error("Error reducing product stock:", error);
+    res.status(500).json({ success: false, message: "Server error" });
+  }
+};

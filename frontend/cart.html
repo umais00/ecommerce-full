@@ -16,7 +16,6 @@
     <title>
       AlMARI | Online Shopping in Pakistan: Fashion, Electronics & Groceries
     </title>
-    <script src="script.js"></script>
   </head>
   <!-- style by umais -->
   <style>
@@ -55,12 +54,14 @@
               </div>
               <div class="right">
                 <ul class="flexitem main-link">
-                  <li><a href="signup.html" id="signup">Sign Up</a></li>
-                  <li><a href="login.html" id="login">Login</a></li>
-                  <li>
-                    <a href="user.html" id="myAccount">My Account</a>
+                  <li id="signup"><a href="signup.html">Sign Up</a></li>
+                  <li id="login"><a href="login.html">Login</a></li>
+                  <li id="myAccount">
+                    <a href="user.html">My Account</a>
                   </li>
-                  <li><a href="#">Order Tracking</a></li>
+                  <li id="myOrders">
+                    <a href="orders.html">My Orders</a>
+                  </li>
                   <li>
                     <a href="#"
                       >PKR<span class="icon-small"
@@ -352,7 +353,7 @@
                     </div>
                   </li>
                   <li class="userli">
-                    <a href="user.html" class="user"></a>
+                    <a href="user.html" class="user" id="user"></a>
                   </li>
                 </ul>
               </div>
@@ -617,39 +618,7 @@
                             <th></th>
                           </tr>
                         </thead>
-                        <tbody id="tbody">
-                          <tr>
-                            <td class="flexitem"></td>
-                            <td>PKR 1,999</td>
-                            <td>
-                              <div class="qty-control flexitem">
-                                <button class="minus">-</button>
-                                <input type="text" value="2" min="1" />
-                                <button class="plus">+</button>
-                              </div>
-                            </td>
-                            <td>PKR 3,998</td>
-                            <td>
-                              <a href="" class="item-remove"
-                                ><i class="ri-close-line"></i
-                              ></a>
-                            </td>
-                          </tr>
-
-                          <td>
-                            <div class="qty-control flexitem">
-                              <button class="minus">-</button>
-                              <input type="text" value="2" min="1" />
-                              <button class="plus">+</button>
-                            </div>
-                          </td>
-                          <td>PKR 7,000</td>
-                          <td>
-                            <a href="" class="item-remove"
-                              ><i class="ri-close-line"></i
-                            ></a>
-                          </td>
-                        </tbody>
+                        <tbody id="tbody"></tbody>
                       </table>
                     </div>
                   </form>
@@ -902,3 +871,4 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.3.1/index.js"></script>
   </body>
 </html>
+<script defer src="scripts/script.js"></script>

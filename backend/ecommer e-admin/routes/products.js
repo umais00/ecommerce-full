@@ -31,5 +31,6 @@ file: router.post("/", upload.single("image"), ProductController.createProduct);
 
 router.patch("/:id", upload.single("image"), ProductController.updateProduct);
 router.delete("/:id", ProductController.deleteProduct);
+router.patch("/:id/rStock", ProductController.rStock);
 
 module.exports = router;

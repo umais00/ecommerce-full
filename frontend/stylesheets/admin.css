@@ -85,6 +85,34 @@ i {
   color: white;
   font-size: 1.8rem;
 }
+#aob {
+  background-color: #5ccfb6;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+  text-shadow: #333 2px -1px 7px;
+}
+.orderh {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.orderh i {
+  font-size: 1.5rem;
+}
+#cob {
+  background-color: #ffb521;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 15px;
+  text-shadow: #333 2px -1px 7px;
+}
 
 .product-form {
   margin-top: 20px;
@@ -206,4 +234,15 @@ i {
   font-size: 10rem;
   font-weight: bold;
   text-align: center;
+}
+
+#orders-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+#orders-completed-list {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }

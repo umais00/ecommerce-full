@@ -17,7 +17,6 @@
       AlMARI | Online Shopping in Pakistan: Fashion, Electronics & Groceries
     </title>
 
-
     <script>
       document.addEventListener("DOMContentLoaded", async () => {
         const token = localStorage.getItem("token"); // Assuming the token is stored in localStorage
@@ -40,7 +39,7 @@
           if (response.ok) {
             const userData = await response.json();
             userId = userData._id;
-            console.log(userData)
+            console.log(userData);
 
             // Populate form fields (if needed)
             document.getElementById("email").value = userData.email;
@@ -50,11 +49,8 @@
               userData.name.split(" ")[1] || ""; // Last name is the second part if available
             document.getElementById("address").value = userData.address;
             document.getElementById("city").value = userData.city;
-            document.getElementById("state").value =
-              userData.province || "";
-            document.getElementById("postal").value =
-              userData.pcode || "";
-
+            document.getElementById("state").value = userData.province || "";
+            document.getElementById("postal").value = userData.pcode || "";
             document.getElementById("phone").value = userData.contact || "";
           } else {
             const errorData = await response.json();
@@ -67,23 +63,50 @@
         }
 
         document
-          .querySelector(".primary-button")
+          .querySelector("#primary-button")
           .addEventListener("click", async (e) => {
-            e.preventDefault()
+            e.preventDefault();
 
             if (!userId) {
               alert("User not found. Please log in.");
               return;
             }
 
+            // Ensure `cart` is defined and accessible
+            if (typeof cart === "undefined") {
+              console.error("Cart is not defined.");
+              return;
+            }
+
+            // Create the products array based on the cart
+            const products = cart.map((item) => ({
+              productId: item.id, // Ensure the ID is passed as productId
+              quantity: item.quantity,
+              price: item.price,
+            }));
+
             const orderData = {
-              user: userId, // Use the fetched user ID
-              products: [], // Add logic to capture products from the cart or other source
-              total: calculateTotal(), // Implement a function to calculate the total amount
+              email: document.getElementById("email").value,
+              firstName: document.getElementById("fname").value,
+              lastName: document.getElementById("lname").value,
+              address: document.getElementById("address").value,
+              city: document.getElementById("city").value,
+              state: document.getElementById("state").value,
+              postalCode: document.getElementById("postal").value,
+              phone: document.getElementById("phone").value,
+              products: cart.map((item) => ({
+                productId: item.id,
+                name: item.name, // Ensure the product name is available in your cart items
+                price: item.price,
+                quantity: item.quantity,
+                image: item.image, // Ensure the image URL is available in your cart items
+              })),
+              totalAmount: calculateTotal(),
+              orderNotes: "", // Add order notes if needed
             };
 
             try {
-              const response = await fetch("/api/orders", {
+              const response = await fetch("http://localhost:5000/api/orders", {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
@@ -94,7 +117,14 @@
 
               if (response.ok) {
                 const newOrder = await response.json();
-                alert("Order placed successfully!");
+                // Display the custom order ID in the alert
+
+                // Clear the cart
+                localStorage.removeItem("cart");
+                localStorage.removeItem("itemNum");
+                setTimeout(() => {
+                  location.href = "index.html";
+                }, 1500);
                 // Redirect or update the UI accordingly
               } else {
                 const errorData = await response.json();
@@ -106,20 +136,21 @@
                 "An error occurred while placing the order:",
                 error
               );
-              alert("An error occurred. Please try again later.");
             }
           });
-
         function calculateTotal() {
-          // Placeholder function for calculating the order total
-          return 200; // Replace with actual total calculation logic
+          // Calculate the total amount based on the cart
+          return cart.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+          );
         }
       });
-
     </script>
-
   </head>
   <body>
+    <div id="alert-box" class="alert-box"></div>
+
     <div id="page" class="site page-checkout">
       <!-- header Start  -->
       <aside class="site-off desktop-hide">
@@ -155,7 +186,9 @@
                   <li id="myAccount">
                     <a href="user.html">My Account</a>
                   </li>
-                  <li><a href="#">Order Tracking</a></li>
+                  <li id="myOrders">
+                    <a href="orders.html">My Orders</a>
+                  </li>
                   <li>
                     <a href="#"
                       >PKR
@@ -449,7 +482,7 @@
                     </div>
                   </li>
                   <li class="userli">
-                    <a href="user.html" class="user"></a>
+                    <a href="user.html" class="user" id="user"></a>
                   </li>
                 </ul>
               </div>
@@ -694,7 +727,7 @@
               <div class="checkout flexwrap">
                 <div class="item left styled">
                   <h1>Shipping Address</h1>
-                  <form id="checkoutForm" >
+                  <form id="checkoutForm">
                     <p>
                       <label for="email">Email Address <span></span></label>
                       <input type="email" name="email" id="email" required />
@@ -721,7 +754,12 @@
                     </p>
                     <p>
                       <label for="postal">Postal Code <span></span></label>
-                      <input type="number" name="postalCode" id="postal" required />
+                      <input
+                        type="number"
+                        name="postalCode"
+                        id="postal"
+                        required
+                      />
                     </p>
                     <p>
                       <label for="phone">Phone Number <span></span></label>
@@ -729,32 +767,45 @@
                     </p>
                     <p>
                       <label>Order Notes (optional)</label>
-                      <textarea name="orderNotes" cols="30" rows="10"></textarea>
+                      <textarea
+                        name="orderNotes"
+                        cols="30"
+                        rows="10"
+                      ></textarea>
                     </p>
                     <div class="shipping-methods">
                       <h2>Shipping Methods</h2>
-                      <h3 style="color:#ff3333">*We only do Cash On Delivery for now</h3>
+                      <h3 style="color: #ff3333">
+                        *We only do Cash On Delivery for now
+                      </h3>
                       <p class="checkset">
-                        <input type="radio" name="shippingMethod" value="200" checked />
+                        <input
+                          type="radio"
+                          name="shippingMethod"
+                          value="200"
+                          checked
+                        />
                         <label>PKR 200 Flat Rate</label>
                       </p>
                     </div>
                     <div class="primary-checkout">
-                      <input type="submit" value="Place Order" class="primary-button">
+                      <input
+                        type="submit"
+                        onclick="showAlert('your order has been placed')"
+                        value="Place Order"
+                        class="primary-button"
+                        id="primary-button"
+                      />
                     </div>
                   </form>
-                  
-              
                 </div>
                 <div class="item right">
                   <h2>Order Summary</h2>
                   <div class="summary-order is_sticky">
                     <div class="summary-totals">
                       <ul>
-                      
-                          <span>TOTAL</span>
-                          <span><strong id="tt">PKR 23,199</strong></span>
-                        </li>
+                        <span>TOTAL</span>
+                        <span id="tt">PKR </span>
                       </ul>
                     </div>
                     <ul class="products mini" id="checkoutprod">
@@ -974,55 +1025,61 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fslightbox/3.3.1/index.js"></script>
   </body>
 </html>
-<script src="script.js"></script>
 <script>
-  if(!localStorage.getItem("cart")){
+  if (!localStorage.getItem("cart")) {
     alert("Please fill out the cart first!");
-    location.href = "categoreis.html"
+    location.href = "categoreis.html";
   }
-document.getElementById('checkoutForm').addEventListener('submit', function(event) {
-  event.preventDefault();
+  document
+    .getElementById("checkoutForm")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
 
-  if(localStorage.getItem('cart')){
-  const formData = {
-    email: document.getElementById('email').value,
-    firstName: document.getElementById('fname').value,
-    lastName: document.getElementById('lname').value,
-    address: document.getElementById('address').value,
-    city: document.getElementById('city').value,
-    state: document.getElementById('state').value,
-    postalCode: document.getElementById('postal').value,
-    phone: document.getElementById('phone').value,
-    orderNotes: document.querySelector('textarea[name="orderNotes"]').value,
-    products: JSON.parse(localStorage.getItem('cart')), // Make sure cart items are correctly formatted
-    totalAmount: calculateTotalAmount(), // Implement this function to calculate total
-  };
+      if (localStorage.getItem("cart")) {
+        const formData = {
+          email: document.getElementById("email").value,
+          firstName: document.getElementById("fname").value,
+          lastName: document.getElementById("lname").value,
+          address: document.getElementById("address").value,
+          city: document.getElementById("city").value,
+          state: document.getElementById("state").value,
+          postalCode: document.getElementById("postal").value,
+          phone: document.getElementById("phone").value,
+          orderNotes: document.querySelector('textarea[name="orderNotes"]')
+            .value,
+          products: JSON.parse(localStorage.getItem("cart")), // Make sure cart items are correctly formatted
+          totalAmount: calculateTotalAmount(), // Implement this function to calculate total
+        };
 
-  fetch('http://127.0.0.1:5000/api/orders', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(formData),
-  })
-    .then(response => response.json())
-    .then(data => {
-      alert("Your order has been successfully processed")
-      localStorage.removeItem("itemNum");      // Handle successful response, e.g., show a success message or redirect
-      localStorage.removeItem("cart"); 
-           // Handle successful response, e.g., show a success message or redirect
-           location.reload();
-    })
-    .catch((error) => {
-      console.error('Error:', error);
+        fetch("http://127.0.0.1:5000/api/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            alert("Your order has been successfully processed");
+            localStorage.removeItem("itemNum"); // Handle successful response, e.g., show a success message or redirect
+            localStorage.removeItem("cart");
+            // Handle successful response, e.g., show a success message or redirect
+            location.href = "categoreis.html";
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      } else {
+        alert("Your cart is empty. Please add items to proceed with checkout.");
+      }
     });
-  } else{
-    alert("Your cart is empty. Please add items to proceed with checkout.")
-  }
-});
 
-function calculateTotalAmount() {
-  const cart = JSON.parse(localStorage.getItem('cart')) || [];
-  return cart.reduce((total, item) => total + (item.price * (item.quantity || 1)), 0);
-}
+  function calculateTotalAmount() {
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    return cart.reduce(
+      (total, item) => total + item.price * (item.quantity || 1),
+      0
+    );
+  }
 </script>
+<script src="scripts/script.js"></script>

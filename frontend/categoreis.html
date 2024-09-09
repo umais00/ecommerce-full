@@ -16,6 +16,7 @@
     <title>
       AlMARI | Online Shopping in Pakistan: Fashion, Electronics & Groceries
     </title>
+
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const categoryFilters = document.getElementById("category-filters");
@@ -81,7 +82,7 @@
           container.innerHTML = products
             .map(
               (product) => `
-      <div class="item">
+      <div class="item" data-product-id='${product._id}'>
         <div class="media">
           <div class="thumbnail object-cover">
             <a href="#"><img src="${product.productlink}" alt="${
@@ -116,7 +117,7 @@
           <div class="price patc">
             <span id="current" class="current">PKR ${product.price}</span>
             <span class="normal mini-text">PKR ${product.price * 1.5}</span>
-            <button onclick="addToCart(this)" class="atcbtn">Add to cart</button>
+<button onclick="addToCart(this)" class="atcbtn">Add to cart</button>
           </div>
           <div class="footer">
             <ul class="mini-text">
@@ -135,9 +136,11 @@
         fetchProducts(); // Fetch and display products on page load
       });
     </script>
-    <script defer src="script.js"></script>
+    <script src="scripts/script.js"></script>
   </head>
   <body>
+    <div id="alert-box" class="alert-box"></div>
+
     <div id="page" class="site page-category">
       <!-- header Start  -->
       <aside class="site-off desktop-hide">
@@ -173,7 +176,9 @@
                   <li id="myAccount">
                     <a href="user.html">My Account</a>
                   </li>
-                  <li><a href="#">Order Tracking</a></li>
+                  <li id="myOrders">
+                    <a href="orders.html">My Orders</a>
+                  </li>
                   <li>
                     <a href="#"
                       >PKR<span class="icon-small"
@@ -465,7 +470,7 @@
                     </div>
                   </li>
                   <li class="userli">
-                    <a href="user.html" class="user"></a>
+                    <a href="user.html" class="user" id="user"></a>
                   </li>
                 </ul>
               </div>
